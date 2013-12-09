@@ -4,8 +4,7 @@ module EventAggregator
 
 		@@message_types = Hash.new
 
-		def self.register( listener, message_type )#TODO: Maybe redesign this to get the types of messages this listens for, and put them into a hash with lists of all listeners for that message.
-			#@@listeners << listener
+		def self.register( listener, message_type )
 			@@listeners[message_type] << listener unless @@listeners[message_type].include?(listener)
 		end
 
@@ -17,7 +16,6 @@ module EventAggregator
 			return "Not a valid message" unless message.is_a? EventAggregator::Message
 
 			@@listeners[message.message_type].each do |l|
-				#l.recieve_message if l.want message
 				l.recieve_message message
 			end
 		end

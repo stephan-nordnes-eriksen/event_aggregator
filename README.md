@@ -1,6 +1,8 @@
 # EventAggregator
 
-TODO: Write a gem description
+The 'event_aggregator' gem is a gem for using the event aggregator pattern in Ruby. 
+
+An event aggregator is essentially a message passing service that aims at decoupeling object communication and that lets 
 
 ## Installation
 
@@ -18,7 +20,25 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+	#!/usr/bin/ruby
+
+	require "rubygems"
+	require "event_aggregator"
+
+	class Foo
+		include EventAggregator::Listener
+		def initialize()
+			message_type_to_recieve_add( "foo", lambda{ puts "bar" } )
+		end
+	end
+
+	f = Foo.new
+
+	EventAggregator::Message.new("foo", "data").publish
+	#=> bar
+	EventAggregator::Message.new("foo2", "data").publish
+	#=>
+
 
 ## Contributing
 
@@ -27,3 +47,8 @@ TODO: Write usage instructions here
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Todo:
+
+ - Enable threaded message passing for higher performance. 
+ - Improving the readme and documentation in the gem.
