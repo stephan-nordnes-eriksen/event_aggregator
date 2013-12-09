@@ -57,5 +57,6 @@ Or install it yourself as:
 
 ## Todo:
 
+ - Adding tests
  - Enable threaded message passing for higher performance. 
  - Improving the readme and documentation in the gem.
