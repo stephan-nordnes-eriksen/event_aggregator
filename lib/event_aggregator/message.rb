@@ -1,6 +1,6 @@
 module EventAggregator
 	class Message
-		attr_accessor :message_type
+		attr_accessor :message_type, :data
 		@message_type = nil
 		@data = nil
 		def initialize(message_type, data)

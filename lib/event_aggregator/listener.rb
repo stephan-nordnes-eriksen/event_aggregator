@@ -64,7 +64,7 @@ module EventAggregator
 		def recieve_message( message )
 			m = event_listener_listens_to[message.message_type]
 
-			m.call if m.respond_to? :call #Should not need the check here, however who knows what kind of conurrency issues we might have.
+			m.call(message.data) if m.respond_to? :call #Should not need the check here, however who knows what kind of conurrency issues we might have.
 			#This will probably become hotpath, so having the extra check can be problematic.
 		end
 
