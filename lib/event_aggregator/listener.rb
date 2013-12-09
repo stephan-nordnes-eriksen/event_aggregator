@@ -1,4 +1,4 @@
-module Aggregator
+module EventAggregator
 	# Public: A module you can include or extend to recieve messages from
 	# the event Aggregator system.
 	#
