@@ -14,7 +14,7 @@ module EventAggregator
 		end
 
 		def self.message_publish ( message )
-			return "Not a valid message" unless message.is_a? EventMessage
+			return "Not a valid message" unless message.is_a? EventAggregator::Message
 
 			@@listeners[message.message_type].each do |l|
 				#l.recieve_message if l.want message
