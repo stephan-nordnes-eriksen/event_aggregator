@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["stephan.n.eriksen@gmail.com"]
   spec.description   = %q{A simple Ruby event aggregator.}
   spec.summary       = %q{Event aggregator for Ruby.}
-  spec.homepage      = "http://neugle.info"
+  spec.homepage      = "https://github.com/stephan-nordnes-eriksen/event_aggregator"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

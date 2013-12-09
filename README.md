@@ -29,6 +29,12 @@ Or install it yourself as:
 		include EventAggregator::Listener
 		def initialize()
 			message_type_to_recieve_add( "foo", lambda{ puts "bar" } )
+
+			message_type_to_recieve_add( "foo2", method(:handle_message) )
+		end
+
+		def handle_message(data)
+			puts data
 		end
 	end
 
@@ -37,8 +43,9 @@ Or install it yourself as:
 	EventAggregator::Message.new("foo", "data").publish
 	#=> bar
 	EventAggregator::Message.new("foo2", "data").publish
-	#=>
-
+	#=> data
+	EventAggregator::Message.new("foo3", "data").publish
+	#=> 
 
 ## Contributing
 
