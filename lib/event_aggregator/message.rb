@@ -7,5 +7,9 @@ module EventAggregator
 			@message_type = message_type
 			@data = data
 		end
+
+		def publish
+			Aggregator.message_publish( self )
+		end
 	end
 end

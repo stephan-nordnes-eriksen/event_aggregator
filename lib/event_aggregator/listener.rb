@@ -68,10 +68,6 @@ module EventAggregator
 			#This will probably become hotpath, so having the extra check can be problematic.
 		end
 
-		def message_send( message )
-			Aggregator.message_publish( message )
-		end
-
 		private
 		def event_listener_listens_to
 			@event_listener_listens_to ||= Hash.new
