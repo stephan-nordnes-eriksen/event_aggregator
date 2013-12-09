@@ -1,6 +1,6 @@
-module EventAggregator
+module Aggregator
 	# Public: A module you can include or extend to recieve messages from
-	# the event EventAggregator system.
+	# the event Aggregator system.
 	#
 	# Examples
 	#
@@ -53,9 +53,9 @@ module EventAggregator
 				# back up method's name
 				alias_method :old_initialize, :initialize
 
-				# replace the old method with a new version which adds the EventAggregator registry
+				# replace the old method with a new version which adds the Aggregator registry
 				def initialize(*args)
-					EventAggregator.register self
+					Aggregator.register self
 					old_initialize(*args)
 				end
 			end
@@ -69,7 +69,7 @@ module EventAggregator
 		end
 
 		def message_send( message )
-			EventAggregator.message_publish( message )
+			Aggregator.message_publish( message )
 		end
 
 		private
@@ -89,7 +89,7 @@ module EventAggregator
 		#
 		def message_type_to_recieve_add( message_type, callback )
 			event_listener_listens_to[message_type] = callback #unless event_listener_listens_to[message_type] #It makes more sence to overwrite in the case it already exists.
-			EventAggregator.register( self, message_type )
+			Aggregator.register( self, message_type )
 		end
 
 		# Public: Used to remove a certain type of message from your listening types. Messages of this specific type will no longer
@@ -103,7 +103,7 @@ module EventAggregator
 		#
 		def message_type_to_recieve_remove( message_type )
 			event_listener_listens_to[message_type] = nil
-			EventAggregator.unregister(self, message_type)
+			Aggregator.unregister(self, message_type)
 		end
 	end
 end
