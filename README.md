@@ -1,5 +1,7 @@
 # EventAggregator
 
+#### Note: This is a very early release and subject to many changes. It is currently not tested propperly, and there are several issues ranging from potential dead-locks to upcoming refactoring.
+
 The 'event_aggregator' gem is a gem for using the event aggregator pattern in Ruby. 
 
 An event aggregator is essentially a message passing service that aims at decoupeling object communication and that lets 
