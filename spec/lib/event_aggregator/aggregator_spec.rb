@@ -3,30 +3,51 @@ require 'spec_helper'
 describe EventAggregator::Aggregator do
 	describe "self.register" do
 		describe 'when registering legal listener' do
-			let(:listener) { Class.new { EventAggregator::Listener}.new } 
-			it 'increases register count' do
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners).length).to equal(0)
-				#listener = listener.new
-				EventAggregator::Aggregator.register(listener, Faker::Name.name)
+			let(:listener_class) { Class.new { include EventAggregator::Listener }} 
+			let(:listener) { (Class.new { include EventAggregator::Listener }).new } 
+			let(:listener_mock) {  }
 
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners).length).to equal(1)
+			before(:each) do
+				EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
+			end
+			it 'increases register count' do
+				expect{EventAggregator::Aggregator.register(listener, Faker::Name.name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(1)
+			end
+
+			it 'registered at correct place' do
+				name = Faker::Name.name
+				EventAggregator::Aggregator.register(listener, name)
+				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[name]).to include(listener)
+			end
+
+			it 'should not be registered in wrong place' do
+				name = Faker::Name.name
+				EventAggregator::Aggregator.register(listener, name)
+				EventAggregator::Aggregator.class_variable_get(:@@listeners).each do |e|
+					if e[0] == name
+						expect(e[1]).to include(listener)
+					else
+						expect(e[1]).to_not include(listener)
+					end
+				end
 			end
 		end
 		describe 'when illegal parameters' do
 			it 'should not allow nil as message type' do
-				pending "not implemented"
+				expect{EventAggregator::Aggregator.register(nil, Faker::Name.name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(0)
 			end
 			it 'should not allow non-listener to register' do
-				pending "not implemented"
+				expect{EventAggregator::Aggregator.register(EventAggregator::Message.new("a","b"), Faker::Name.name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(0)
+				expect{EventAggregator::Aggregator.register("string", Faker::Name.name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(0)
+				expect{EventAggregator::Aggregator.register(1, Faker::Name.name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(0)
+				expect{EventAggregator::Aggregator.register(2.0, Faker::Name.name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(0)
 			end
 		end
 	end
 
 	describe "self.unregister" do
 		describe 'when unregitering registered listener from correct message type'  do
-			before(:each) do
-				@listener = DummyListener.new
-			end
+
 		end
 		describe 'when unregitering nonregisterd listener' do
 			pending "not implemented"
