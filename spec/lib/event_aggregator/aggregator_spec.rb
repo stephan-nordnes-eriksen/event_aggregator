@@ -3,8 +3,8 @@ require 'spec_helper'
 describe EventAggregator::Aggregator do
 	describe "self.register" do
 		describe 'when registering legal listener' do
-			let(:listener_class) { Class.new { include EventAggregator::Listener }} 
-			let(:listener) { (Class.new { include EventAggregator::Listener }).new } 
+			let(:listener_class) { Class.new { include EventAggregator::Listener }}
+			let(:listener) { (Class.new { include EventAggregator::Listener }).new }
 			let(:listener_mock) {  }
 
 			before(:each) do
@@ -46,7 +46,7 @@ describe EventAggregator::Aggregator do
 	end
 
 	describe "self.unregister" do
-		let(:listener) { (Class.new { include EventAggregator::Listener }).new } 
+		let(:listener) { (Class.new { include EventAggregator::Listener }).new }
 		before(:each) do
 			EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
 		end
@@ -58,19 +58,44 @@ describe EventAggregator::Aggregator do
 			end
 		end
 		describe 'when unregitering nonregisterd listener' do
-			pending "not implemented"
+			it 'should not change list' do
+				pending "not implemented"
+			end
 		end
 		describe 'when unregitering listener from wrong message type' do
-			pending "not implemented"
+			it 'should not change list' do
+				name = Faker::Name.name
+				name2 = Faker::Name.name
+				name2 << "equal" if name == name2
+				EventAggregator::Aggregator.register(listener, name)
+				expect{EventAggregator::Aggregator.unregister(listener, name2)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners)[name].length}.by(0)
+			end
 		end
 		describe 'when unregitering non-listener class' do
-			pending "not implemented"
+			it 'should not change register list' do
+				name = Faker::Name.name
+				expect{EventAggregator::Aggregator.unregister(EventAggregator::Message.new("a","b"), name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(0)
+				expect{EventAggregator::Aggregator.unregister("string", name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(0)
+				expect{EventAggregator::Aggregator.unregister(1, name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(0)
+				expect{EventAggregator::Aggregator.unregister(2.0, name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners).length}.by(0)
+			end
 		end
 	end
 
 	describe "self.unregister_all" do
+		describe "when unregistering listener registered to one message type" do
+			it "should unregister from list" do
+				pending "not implemented"
+			end
+		end
+		describe "when unregistering listener registered for several message types" do
+			it "should unregister from all lists" do
+				pending "not implemented"
+			end
+		end
 
 	end
+
 	describe "self.message_publish" do
 		describe 'when recieving correct messages' do
 			it 'should recieve correct messages' do
