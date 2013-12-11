@@ -46,8 +46,16 @@ describe EventAggregator::Aggregator do
 	end
 
 	describe "self.unregister" do
+		let(:listener) { (Class.new { include EventAggregator::Listener }).new } 
+		before(:each) do
+			EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
+		end
 		describe 'when unregitering registered listener from correct message type'  do
-
+			it 'should decrease count by 1' do
+				name = Faker::Name.name
+				EventAggregator::Aggregator.register(listener, name)
+				expect{EventAggregator::Aggregator.unregister(listener, name)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners)[name].length}.by(-1)
+			end
 		end
 		describe 'when unregitering nonregisterd listener' do
 			pending "not implemented"
@@ -60,6 +68,9 @@ describe EventAggregator::Aggregator do
 		end
 	end
 
+	describe "self.unregister_all" do
+
+	end
 	describe "self.message_publish" do
 		describe 'when recieving correct messages' do
 			it 'should recieve correct messages' do

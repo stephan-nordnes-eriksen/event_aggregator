@@ -9,7 +9,9 @@ module EventAggregator
 		def self.unregister( listener, message_type )
 			@@listeners[message_type].delete listener
 		end
-
+		def self.unregister_all( listener )
+			#TODO: Implement
+		end
 		def self.message_publish ( message )
 			#TODO: Figure out behaviour when not recieving a correct message. Maybe "do nothing" is the right thing.
 			return "Not a valid message" unless message.is_a? EventAggregator::Message
