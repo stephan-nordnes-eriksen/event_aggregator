@@ -1,21 +1,14 @@
 require 'spec_helper'
 
-
-
-class DummyListener
-	include EventAggregator::Listener
-end
-
-
 describe EventAggregator::Aggregator do
 	describe "self.register" do
 		describe 'when registering legal listener' do
-			before(:each) do
-				@listener = DummyListener.new
-			end
+			let(:listener) { Class.new { EventAggregator::Listener}.new } 
 			it 'increases register count' do
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners).length).to equal(0)
-				EventAggregator::Aggregator.register(@listener, Faker::Name.name)
+				#listener = listener.new
+				EventAggregator::Aggregator.register(listener, Faker::Name.name)
+
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners).length).to equal(1)
 			end
 		end
