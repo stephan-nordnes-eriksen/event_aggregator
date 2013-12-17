@@ -40,7 +40,7 @@ describe EventAggregator::Message do
 			expect{EventAggregator::Message.new(message_type, data)}.to_not raise_error
 		end
 		it 'should have non-nil message_type' do
-			#expect{EventAggregator::Message.new(nil, data)}.to raise_error
+			expect{EventAggregator::Message.new(nil, data)}.to raise_error
 		end
 		it 'should have initialize data publicly available' do
 			message = EventAggregator::Message.new(message_type, data)
