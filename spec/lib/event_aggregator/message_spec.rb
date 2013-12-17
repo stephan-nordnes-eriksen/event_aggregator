@@ -24,7 +24,7 @@ describe EventAggregator::Message do
     	end
     	it 'should be published to the aggregator' do
     		message = EventAggregator::Message.new(message_type, data)
-    		expect{EventAggregator::Aggregator}.to recieve(:message_publish).with(message)
+    		expect(EventAggregator::Aggregator).to receive(:message_publish).with(message)
 
     		message.publish
     	end
