@@ -159,10 +159,33 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.register(listener, message_type)
 				message = EventAggregator::Message.new(message_type, data)
 
-				expect(listener).to receive(:receive_message)
+				expect(listener).to receive(:receive_message).with(message)
+
+				EventAggregator::Aggregator.message_publish(message)
 			end
 			it 'should receive incorrect messages' do
-				pending "not implemented"
+				message_type2 = message_type << " different"
+				EventAggregator::Aggregator.register(listener, message_type)
+				message = EventAggregator::Message.new(message_type2, data)
+
+				expect(listener).to_not receive(:receive_message)
+
+				EventAggregator::Aggregator.message_publish(message)
+			end
+
+			it 'should send message to right listener' do
+				listener2 = listener_class.new
+				message_type2 = message_type << " different"
+
+				EventAggregator::Aggregator.register(listener, message_type)
+				EventAggregator::Aggregator.register(listener, message_type2)
+
+				message = EventAggregator::Message.new(message_type, data)
+
+				expect(listener).to receive(:receive_message).with(message)
+				expect(listener2).to_not receive(:receive_message)
+
+				EventAggregator::Aggregator.message_publish(message)
 			end
 		end
 		describe 'when recieving illegal parameters' do

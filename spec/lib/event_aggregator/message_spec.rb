@@ -35,8 +35,8 @@ describe EventAggregator::Message do
 		let(:data)         {Faker::Name.name}
 			
 		it 'should require initialize data' do
-			expect{EventAggregator::Message.new(message_type)}.to raise_error
-			expect{EventAggregator::Message.new(data)}.to raise_error
+			expect{EventAggregator::Message.new(message_type)}.to           raise_error
+			expect{EventAggregator::Message.new(data)}.to                   raise_error
 			expect{EventAggregator::Message.new(message_type, data)}.to_not raise_error
 		end
 		it 'should have non-nil message_type' do
@@ -46,7 +46,7 @@ describe EventAggregator::Message do
 			message = EventAggregator::Message.new(message_type, data)
 			
 			expect(message.message_type).to equal(message_type)
-			expect(message.data).to equal(data)
+			expect(message.data).to         equal(data)
 		end
 	end
 end
