@@ -1,5 +1,5 @@
 module EventAggregator
-	# Public: A module you can include or extend to recieve messages from
+	# Public: A module you can include or extend to receive messages from
 	# the event Aggregator system.
 	#
 	# Examples
@@ -9,7 +9,7 @@ module EventAggregator
 	# 		...
 	# 		def initialize()
 	# 			...
-	# 			message_type_to_recieve_add( "foo", lambda{ puts "bar" } )
+	# 			message_type_to_receive_add( "foo", lambda{ puts "bar" } )
 	# 		end
 	# 		...
 	#  	end
@@ -43,7 +43,7 @@ module EventAggregator
 
 
 		# Public: DEPRICATED: Adding extra initialize to the class so that we make sure new objects are added to the EventAggregators registry.
-		# This whole hack-deal is possibly not nescessary. Can be omited with a simple "register" when you add a new "recieve message_type"
+		# This whole hack-deal is possibly not nescessary. Can be omited with a simple "register" when you add a new "receive message_type"
 		#
 		# base - The class object for the class including the Listener module
 		#
@@ -61,7 +61,7 @@ module EventAggregator
 			end
 		end
 
-		def recieve_message( message )
+		def receive_message( message )
 			m = event_listener_listens_to[message.message_type]
 
 			m.call(message.data) if m.respond_to? :call #Should not need the check here, however who knows what kind of conurrency issues we might have.
@@ -72,18 +72,18 @@ module EventAggregator
 		def event_listener_listens_to
 			@event_listener_listens_to ||= Hash.new
 		end
-		# public: Use to add message types you want to recieve. Overwirte existing callback when existing message type is given.
+		# public: Use to add message types you want to receive. Overwirte existing callback when existing message type is given.
 		#
-		# message_type 	- A string indicating the message type you want to recieve from the event aggregrator. Can actually be anything.
-		# callback 		- The method that will be invoked every time this message type is recieved. Must have: callback.respond_to? :call #=> true
+		# message_type 	- A string indicating the message type you want to receive from the event aggregrator. Can actually be anything.
+		# callback 		- The method that will be invoked every time this message type is received. Must have: callback.respond_to? :call #=> true
 		#
 		# Examples
 		#
-		#   message_type_to_recieve_add("foo", method(:my_class_method))
-		#   message_type_to_recieve_add("foo", lambda { puts "foo" })
-		#   message_type_to_recieve_add("foo", Proc.new { puts "foo" })
+		#   message_type_to_receive_add("foo", method(:my_class_method))
+		#   message_type_to_receive_add("foo", lambda { puts "foo" })
+		#   message_type_to_receive_add("foo", Proc.new { puts "foo" })
 		#
-		def message_type_to_recieve_add( message_type, callback )
+		def message_type_to_receive_add( message_type, callback )
 			event_listener_listens_to[message_type] = callback #unless event_listener_listens_to[message_type] #It makes more sence to overwrite in the case it already exists.
 			Aggregator.register( self, message_type )
 		end
@@ -91,13 +91,13 @@ module EventAggregator
 		# Public: Used to remove a certain type of message from your listening types. Messages of this specific type will no longer
 		# invoke any callbacks.
 		#
-		# message_type -A string indicating the message type you no longer want to recieve.
+		# message_type -A string indicating the message type you no longer want to receive.
 		#
 		# Examples
 		#
-		#   message_type_to_recieve_remove("foo")
+		#   message_type_to_receive_remove("foo")
 		#
-		def message_type_to_recieve_remove( message_type )
+		def message_type_to_receive_remove( message_type )
 			event_listener_listens_to[message_type] = nil
 			Aggregator.unregister(self, message_type)
 		end

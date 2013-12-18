@@ -1,19 +1,19 @@
 require 'spec_helper'
 
 describe EventAggregator::Listener do
-	describe '.recieve_message' do
+	describe '.receive_message' do
 		it 'pending' do
 			pending "not implemented"
 		end
 	end
 	
-	describe '.message_type_to_recieve_add' do
+	describe '.message_type_to_receive_add' do
 		it 'pending' do
 			pending "not implemented"
 		end
 	end
 
-	describe '.message_type_to_recieve_remove' do
+	describe '.message_type_to_receive_remove' do
 		it 'pending' do
 			pending "not implemented"
 		end

@@ -15,10 +15,10 @@ describe EventAggregator::Message do
 			EventAggregator::Aggregator.register(@listener_two, message_type+" different")
 		end
 
-    	it 'should be recieved by a correct subscribers' do
+    	it 'should be received by a correct subscribers' do
     		message = EventAggregator::Message.new(message_type, data)
-    		expect(@listener_one).to receive(:recieve_message).with(message)
-    		expect(@listener_two).to_not receive(:recieve_message)
+    		expect(@listener_one).to receive(:receive_message).with(message)
+    		expect(@listener_two).to_not receive(:receive_message)
 
     		message.publish
     	end
