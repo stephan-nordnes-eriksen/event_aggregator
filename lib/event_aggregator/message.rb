@@ -5,6 +5,7 @@ module EventAggregator
 		@data = nil
 		def initialize(message_type, data)
 			raise "Illegal Message Type" if !message_type
+			
 			@message_type = message_type
 			@data = data
 		end
