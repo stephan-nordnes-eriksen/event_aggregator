@@ -4,13 +4,14 @@ describe EventAggregator::Aggregator do
 	let(:listener)       { (Class.new { include EventAggregator::Listener }).new }
 	let(:listener_class) { Class.new { include EventAggregator::Listener }}
 	let(:message_type)   { Faker::Name.name }
-	describe "self.register" do
-		describe 'when registering legal listener' do
-			
-			before(:each) do
-				EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
-			end
+	let(:data)   { Faker::Name.name }
 
+	before(:each) do
+		EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
+	end
+
+	describe "self.register" do
+		describe 'legal parameters' do
 			it 'registered at correct place' do
 				EventAggregator::Aggregator.register(listener, message_type)
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type]).to include(listener)
@@ -27,7 +28,7 @@ describe EventAggregator::Aggregator do
 				end
 			end
 		end
-		describe 'when illegal parameters' do
+		describe 'illegal parameters' do
 			it 'should not allow nil as message type' do
 				expect{EventAggregator::Aggregator.register(nil, message_type)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
 			end
@@ -44,7 +45,7 @@ describe EventAggregator::Aggregator do
 		before(:each) do
 			EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
 		end
-		describe 'when unregitering registered listener from correct message type'  do
+		describe 'unregitering registered listener from correct message type'  do
 			it 'should decrease count by 1' do
 				EventAggregator::Aggregator.register(listener, message_type)
 				expect{EventAggregator::Aggregator.unregister(listener, message_type)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type].length}.by(-1)
@@ -55,16 +56,17 @@ describe EventAggregator::Aggregator do
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type]).to_not include(listener)
 			end
 			it 'should keep listener in unrelated lists' do
-				EventAggregator::Aggregator.register(listener, message_type)
 				message_type2 = message_type << " different"
-
+				
+				EventAggregator::Aggregator.register(listener, message_type)
 				EventAggregator::Aggregator.register(listener, message_type2)
+				
 				EventAggregator::Aggregator.unregister(listener, message_type)
 				
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type2]).to include(listener)
 			end
 		end
-		describe 'when unregitering nonregisterd listener' do
+		describe 'unregitering nonregisterd listener' do
 			it 'should not change list' do
 				message_type1 = message_type << " different"
 				message_type2 = message_type << " different 2"
@@ -86,7 +88,7 @@ describe EventAggregator::Aggregator do
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type3]).to include(listener3)
 			end
 		end
-		describe 'when unregitering listener from wrong message type' do
+		describe 'unregitering listener from wrong message type' do
 			it 'should not change list' do
 				message_type2 = message_type << " different"
 
@@ -95,7 +97,7 @@ describe EventAggregator::Aggregator do
 				expect{EventAggregator::Aggregator.unregister(listener, message_type2)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
 			end
 		end
-		describe 'when unregitering non-listener class' do
+		describe 'unregitering non-listener class' do
 			it 'should not change register list' do
 				expect{EventAggregator::Aggregator.unregister(EventAggregator::Message.new("a","b"), message_type)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
 				expect{EventAggregator::Aggregator.unregister("string", message_type)}.to_not                              change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
@@ -109,7 +111,7 @@ describe EventAggregator::Aggregator do
 		before(:each) do
 			EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
 		end
-		describe "when unregistering listener registered to one message type" do
+		describe "unregistering listener registered to one message type" do
 			it "should unregister from list" do
 				EventAggregator::Aggregator.register(listener, message_type)
 
@@ -138,7 +140,7 @@ describe EventAggregator::Aggregator do
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type3]).to include(listener4)
 			end
 		end
-		describe "when unregistering listener registered for several message types" do
+		describe "unregistering listener registered for several message types" do
 			it "should unregister from all lists" do
 				EventAggregator::Aggregator.register(listener, message_type)
 				message_type2 = message_type << " different"
@@ -154,7 +156,7 @@ describe EventAggregator::Aggregator do
 	end
 
 	describe "self.message_publish" do
-		describe 'when recieving correct messages' do
+		describe 'legal parameters' do
 			it 'should receive correct messages' do
 				EventAggregator::Aggregator.register(listener, message_type)
 				message = EventAggregator::Message.new(message_type, data)
@@ -163,7 +165,7 @@ describe EventAggregator::Aggregator do
 
 				EventAggregator::Aggregator.message_publish(message)
 			end
-			it 'should receive incorrect messages' do
+			it 'should not receive incorrect messages' do
 				message_type2 = message_type << " different"
 				EventAggregator::Aggregator.register(listener, message_type)
 				message = EventAggregator::Message.new(message_type2, data)
@@ -188,7 +190,7 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.message_publish(message)
 			end
 		end
-		describe 'when recieving illegal parameters' do
+		describe 'illegal parameters' do
 			it 'non-message type' do
 				expect{EventAggregator::Aggregator.message_publish("string")}.to raise_error
 				expect{EventAggregator::Aggregator.message_publish(1)}.to        raise_error

@@ -9,6 +9,7 @@ module EventAggregator
 		def self.unregister( listener, message_type )
 			@@listeners[message_type].delete listener
 		end
+		
 		def self.unregister_all( listener )
 			@@listeners.each do |e|
 				e[1].delete(listener)
