@@ -9,7 +9,6 @@ describe EventAggregator::Aggregator do
 	before(:each) do
 		EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
 	end
-
 	describe "self.register" do
 		describe 'legal parameters' do
 			it 'registered at correct place' do
@@ -166,6 +165,7 @@ describe EventAggregator::Aggregator do
 			end
 			it 'should not receive incorrect messages' do
 				message_type2 = message_type + " different"
+				
 				EventAggregator::Aggregator.register(listener, message_type)
 				message = EventAggregator::Message.new(message_type2, data)
 
