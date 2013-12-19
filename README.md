@@ -1,6 +1,6 @@
 # EventAggregator
 
-#### Note: This is a very early release and subject to many changes. It is currently not tested propperly, and there are several issues ranging from potential dead-locks to upcoming refactoring.
+#### Note: This is a very early release and subject to many changes. There are several issues ranging from potential dead-locks and more. See issues for more detalis.
 
 The 'event_aggregator' gem is a gem for using the event aggregator pattern in Ruby. 
 
@@ -30,9 +30,9 @@ Or install it yourself as:
 	class Foo
 		include EventAggregator::Listener
 		def initialize()
-			message_type_to_receive_add( "foo", lambda{|data| puts "bar" } )
+			message_type_register( "foo", lambda{|data| puts "bar" } )
 
-			message_type_to_receive_add( "foo2", method(:handle_message) )
+			message_type_register( "foo2", method(:handle_message) )
 		end
 
 		def handle_message(data)
@@ -48,7 +48,9 @@ Or install it yourself as:
 	#=> data
 	EventAggregator::Message.new("foo3", "data").publish
 	#=> 
-
+	f.message_type_unregister("foo2")
+	EventAggregator::Message.new("foo2", "data").publish
+	#=>
 ## Contributing
 
 1. Fork it
@@ -58,7 +60,5 @@ Or install it yourself as:
 5. Create new Pull Request
 
 ## Todo:
-
- - Adding tests
- - Enable threaded message passing for higher performance. 
  - Improving the readme and documentation in the gem.
+ - Enable threaded message passing for higher performance. 
