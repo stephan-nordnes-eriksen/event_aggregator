@@ -19,6 +19,7 @@ module EventAggregator
 		@@listeners = Hash.new{|h, k| h[k] = []}
 
 		def self.register( listener, message_type )
+			p (! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)).to_s + " :" + message_type
 			@@listeners[message_type] << listener unless ! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)
 		end
 
