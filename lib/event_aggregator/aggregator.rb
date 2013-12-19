@@ -1,10 +1,20 @@
-require 'singleton'
+#require 'singleton'
 
 module EventAggregator
+
+	# Public: TODO: Could potentially turn this into a module.
+	#
+	# 	module OtherSingleton
+	# 		@index = -1
+	# 		@colors = %w{ red green blue }
+	# 		def self.change
+	# 			@colors[(@index += 1) % @colors.size]
+	# 		end
+	# 	end
 	class Aggregator
-  		include Singleton
-  		class <<self; private :new; end
-  		#TODO: Figure out how to do singleton pattern properly 
+		#include Singleton
+		class <<self; private :new; end
+		#TODO: Figure out how to do singleton pattern properly
 
 		@@listeners = Hash.new{|h, k| h[k] = []}
 

@@ -33,11 +33,12 @@ describe EventAggregator::Listener do
 
 					expect(lambda_method).to receive(:call)
 
-					@message.publish
+					listener.receive_message(@message)
 				end
 			end
 		end
 		describe 'illegal parameters' do
+			#This should not recieve illegal parameters.
 			it 'pending' do
 				pending "not implemented"
 			end
@@ -46,16 +47,23 @@ describe EventAggregator::Listener do
 
 	describe '.message_type_to_receive_add' do
 		describe 'legal parameters' do
+			it 'should register at aggregator' do
+				expect(EventAggregator::Aggregator).to receive(:register).with(listener, message_type)
+				
+				listener.class.publicize_methods do
+					listener.message_type_to_receive_add(message_type, lambda_method)
+				end
+			end
 			it 'pending' do
 				pending "not implemented"
 			end
 		end
 		describe 'illegal parameters' do
 			it 'not valid' do
-				expect{listener.message_publish(message_type, nil)}.to                raise_error
-				expect{listener.message_publish(message_type, 1)}.to                  raise_error
-				expect{listener.message_publish(message_type, "string")}.to           raise_error
-				expect{listener.message_publish(message_type, listener_class.new)}.to raise_error
+				expect{listener.message_type_to_receive_add(message_type, nil)}.to                raise_error
+				expect{listener.message_type_to_receive_add(message_type, 1)}.to                  raise_error
+				expect{listener.message_type_to_receive_add(message_type, "string")}.to           raise_error
+				expect{listener.message_type_to_receive_add(message_type, listener_class.new)}.to raise_error
 			end
 		end
 	end
@@ -69,8 +77,7 @@ describe EventAggregator::Listener do
 
 					expect(lambda_method).to_not receive(:call)
 
-					#TODO: Maybe test at a lower level? test the actual event_listener_listens_to object?
-					@message.publish
+					listener.receive_message(@message)
 				end
 			end
 		end
