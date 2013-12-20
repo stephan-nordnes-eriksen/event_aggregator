@@ -15,23 +15,7 @@ module EventAggregator
 	#  	end
 	#
 	module Listener
-		
-		# Public: Depricated
-		#
-		# message -
-		#
-		# Returns the duplicated String.
-		def receive_message( message )
-			m = event_listener_listens_to[message.message_type]
-
-			m.call(message.data) if m.respond_to? :call #Should not need the check here, however who knows what kind of conurrency issues we might have.
-			#This will probably become hotpath, so having the extra check can be problematic.
-		end
-
 		private
-		def event_listener_listens_to
-			@event_listener_listens_to ||= Hash.new
-		end
 		# public: Use to add message types you want to receive. Overwirte existing callback when existing message type is given.
 		#
 		# message_type 	- A string indicating the message type you want to receive from the event aggregrator. Can actually be anything.

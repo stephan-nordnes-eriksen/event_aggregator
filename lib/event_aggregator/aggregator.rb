@@ -59,7 +59,6 @@ module EventAggregator
 
 			@@listeners[message.message_type].each do |l|
 				l[1].call(message.data) if l[1].respond_to? :call
-				#l[0].receive_message message
 			end
 		end
 	end

@@ -26,19 +26,16 @@ describe EventAggregator::Listener do
 
 	describe '.message_type_to_receive_add' do
 		describe 'legal parameters' do
-			it 'should register at aggregator' do
+			it 'invoke aggregator register' do
 				expect(EventAggregator::Aggregator).to receive(:register).with(listener, message_type, lambda_method)
 				
 				listener.class.publicize_methods do
 					listener.message_type_register(message_type, lambda_method)
 				end
 			end
-			it 'pending' do
-				pending "not implemented"
-			end
 		end
 		describe 'illegal parameters' do
-			it 'not valid' do
+			it 'raise error' do
 				expect{listener.message_type_register(message_type, nil)}.to                raise_error
 				expect{listener.message_type_register(message_type, 1)}.to                  raise_error
 				expect{listener.message_type_register(message_type, "string")}.to           raise_error
@@ -57,11 +54,6 @@ describe EventAggregator::Listener do
 
 					listener.message_type_unregister(message_type)
 				end
-			end
-		end
-		describe 'illegal parameters' do
-			it 'not registered reciever' do
-				pending "This will really likely be removed in next refactor"
 			end
 		end
 	end
