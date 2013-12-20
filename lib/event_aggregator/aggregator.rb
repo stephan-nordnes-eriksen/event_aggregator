@@ -23,8 +23,8 @@ module EventAggregator
 		# 				 Often it is preferable to use a string eg. "Message Type".
 		#
 		# Returns True if listener is added. #TODO: Verify this
-		def self.register( listener, message_type )
-			@@listeners[message_type] << listener unless ! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)
+		def self.register( listener, message_type, callback )
+			@@listeners[message_type] << [listener, callback] unless ! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)
 		end
 		
 		# Public: Unegister an EventAggregator::Listener to a 
@@ -37,7 +37,7 @@ module EventAggregator
 		#
 		# Returns True if listener is no longer recieving this message type. #TODO: Verify this
 		def self.unregister( listener, message_type )
-			@@listeners[message_type].delete listener
+			@@listeners[message_type].delete_if{|value| value[0] == listener} 
 		end
 		
 		# Public: As Unregister, but will unregister listener from all message types.
@@ -46,7 +46,7 @@ module EventAggregator
 		# 			 regardless of type.
 		def self.unregister_all( listener )
 			@@listeners.each do |e|
-				e[1].delete(listener)
+				e[1].delete_if{|value| value[0] == listener}
 			end
 		end
 		
@@ -58,7 +58,8 @@ module EventAggregator
 			raise "Invalid message" unless message.is_a? EventAggregator::Message
 
 			@@listeners[message.message_type].each do |l|
-				l.receive_message message
+				l[1].call(message.data) if l[1].respond_to? :call
+				#l[0].receive_message message
 			end
 		end
 	end

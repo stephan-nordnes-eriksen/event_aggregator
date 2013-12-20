@@ -15,6 +15,12 @@ module EventAggregator
 	#  	end
 	#
 	module Listener
+		
+		# Public: Depricated
+		#
+		# message -
+		#
+		# Returns the duplicated String.
 		def receive_message( message )
 			m = event_listener_listens_to[message.message_type]
 
@@ -38,8 +44,7 @@ module EventAggregator
 		#   message_type_register("foo", Proc.new { puts "foo" })
 		#
 		def message_type_register( message_type, callback )
-			event_listener_listens_to[message_type] = callback #unless event_listener_listens_to[message_type] #It makes more sence to overwrite in the case it already exists.
-			Aggregator.register( self, message_type )
+			Aggregator.register( self, message_type, callback)
 		end
 
 		# Public: Used to remove a certain type of message from your listening types. Messages of this specific type will no longer
@@ -52,7 +57,6 @@ module EventAggregator
 		#   message_type_unregister("foo")
 		#
 		def message_type_unregister( message_type )
-			event_listener_listens_to[message_type] = nil
 			Aggregator.unregister(self, message_type)
 		end
 	end

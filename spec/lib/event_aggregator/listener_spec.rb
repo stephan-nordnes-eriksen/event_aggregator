@@ -23,32 +23,11 @@ describe EventAggregator::Listener do
 		EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
 		@message = EventAggregator::Message.new(message_type, data)
 	end
-	describe '.receive_message' do
-		describe 'legal parameters' do
-			it 'execute callback' do
-				#TODO: This is subject to refactor because the method is stroed in the module by a hack.
-				# This stuff should be moved to the aggregator, or somewhere else.
-				listener.class.publicize_methods do
-					listener.message_type_register(message_type, lambda_method)
-
-					expect(lambda_method).to receive(:call)
-
-					listener.receive_message(@message)
-				end
-			end
-		end
-		describe 'illegal parameters' do
-			#This should not recieve illegal parameters.
-			it 'pending' do
-				pending "not implemented"
-			end
-		end
-	end
 
 	describe '.message_type_to_receive_add' do
 		describe 'legal parameters' do
 			it 'should register at aggregator' do
-				expect(EventAggregator::Aggregator).to receive(:register).with(listener, message_type)
+				expect(EventAggregator::Aggregator).to receive(:register).with(listener, message_type, lambda_method)
 				
 				listener.class.publicize_methods do
 					listener.message_type_register(message_type, lambda_method)
@@ -70,14 +49,13 @@ describe EventAggregator::Listener do
 
 	describe '.message_type_to_receive_remove' do
 		describe 'legal parameters' do
-			it 'not recieve callbacks' do
+			it 'invoke aggregator unregister' do
 				listener.class.publicize_methods do
 					listener.message_type_register(message_type, lambda_method)
+					
+					expect(EventAggregator::Aggregator).to receive(:unregister).with(listener, message_type)
+
 					listener.message_type_unregister(message_type)
-
-					expect(lambda_method).to_not receive(:call)
-
-					listener.receive_message(@message)
 				end
 			end
 		end
