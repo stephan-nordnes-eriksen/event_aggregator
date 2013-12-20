@@ -62,3 +62,14 @@ Or install it yourself as:
 ## Todo:
  - Improving the readme and documentation in the gem.
  - Enable threaded message passing for higher performance. 
+
+## Versioning standard:
+Using Semantic Versioning - http://semver.org/
+Given a version number MAJOR.MINOR.PATCH, increment the:
+
+### 0.0.X - Patch
+	Small updates and patches that are backwards-compatible. Updating from 0.0.X -> 0.0.Y should not break your code.
+### 0.X - Minor
+	Adding functionality and changes that are backwards-compatible. Updating from 0.X -> 0.Y should not break your code.
+### X - Major
+	Architectural changes and other major changes that alter the API. Updating from X -> Y will most likely break your code.
