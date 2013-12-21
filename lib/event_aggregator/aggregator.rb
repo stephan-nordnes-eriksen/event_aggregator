@@ -21,8 +21,6 @@ module EventAggregator
 		# 			 the messages.
 		# message_type - The message type to recieve. Can be anything except nil.
 		# 				 Often it is preferable to use a string eg. "Message Type".
-		#
-		# Returns True if listener is added. #TODO: Verify this
 		def self.register( listener, message_type, callback )
 			@@listeners[message_type] << [listener, callback] unless ! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)
 		end
@@ -34,8 +32,6 @@ module EventAggregator
 		# listener - The EventAggregator::Listener which should no longer recieve
 		# 			 the messages.
 		# message_type - The message type to unregister for.
-		#
-		# Returns True if listener is no longer recieving this message type. #TODO: Verify this
 		def self.unregister( listener, message_type )
 			@@listeners[message_type].delete_if{|value| value[0] == listener}
 		end
@@ -56,7 +52,6 @@ module EventAggregator
 		# message - The message to be distributed to the listeners.
 		def self.message_publish ( message, async = true, consisten_data = false )
 			raise "Invalid message" unless message.respond_to?(:message_type) && message.respond_to?(:data)
-			#TODO: Test this async and consistent_data behaviour
 			@@listeners[message.message_type].each do |l|
 				if l[1].respond_to? :call
 					case [async, consisten_data]
