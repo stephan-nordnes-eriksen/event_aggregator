@@ -201,5 +201,52 @@ describe EventAggregator::Aggregator do
 				expect{EventAggregator::Aggregator.message_publish(nil)}.to      raise_error
 			end
 		end
+		describe 'consisten_data behaviour' do
+			it 'uses same object when true' do
+				listener2 = listener_class.new
+				callback1 = lambda{|data|}
+				callback2 = lambda{|data|}
+
+				EventAggregator::Aggregator.register(listener, message_type, callback1)
+				EventAggregator::Aggregator.register(listener2, message_type, callback2)
+				
+				message = EventAggregator::Message.new(message_type, data)
+
+				expect(callback1).to receive(:call) {|arg| expect(arg).to equal(data)}
+				expect(callback2).to receive(:call) {|arg| expect(arg).to equal(data)}
+
+				EventAggregator::Aggregator.message_publish(message, false, true)
+			end
+			it 'uses different objects when false' do
+				listener2 = listener_class.new
+				callback1 = lambda{|data| data ="no"}
+				callback2 = lambda{|data| data ="no"}
+
+				EventAggregator::Aggregator.register(listener, message_type, callback1)
+				EventAggregator::Aggregator.register(listener2, message_type, callback2)
+				
+				message = EventAggregator::Message.new(message_type, data)
+
+				expect(callback1).to receive(:call) {|arg| expect(arg).to_not equal(data)}
+				expect(callback2).to receive(:call) {|arg| expect(arg).to_not equal(data)}
+
+				EventAggregator::Aggregator.message_publish(message, false, false)
+			end
+			it 'objects have same values when false' do
+				listener2 = listener_class.new
+				callback1 = lambda{|data| data ="no"}
+				callback2 = lambda{|data| data ="no"}
+
+				EventAggregator::Aggregator.register(listener, message_type, callback1)
+				EventAggregator::Aggregator.register(listener2, message_type, callback2)
+				
+				message = EventAggregator::Message.new(message_type, data)
+
+				expect(callback1).to receive(:call) {|arg| expect(arg).to eq(data)}
+				expect(callback2).to receive(:call) {|arg| expect(arg).to eq(data)}
+
+				EventAggregator::Aggregator.message_publish(message, false, false)
+			end
+		end
 	end
 end

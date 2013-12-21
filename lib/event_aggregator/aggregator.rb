@@ -56,14 +56,14 @@ module EventAggregator
 		# message - The message to be distributed to the listeners.
 		def self.message_publish ( message, async = true, consisten_data = false )
 			raise "Invalid message" unless message.respond_to?(:message_type) && message.respond_to?(:data)
-			
+			#TODO: Test this async and consistent_data behaviour
 			@@listeners[message.message_type].each do |l|
 				if l[1].respond_to? :call
 					case [async, consisten_data]
-					when [true, true]   then EventAggregator::MessageJob.new.async.perform(message.data, l[1])
+					when [true, true]   then EventAggregator::MessageJob.new.async.perform(message.data,       l[1])
 					when [true, false]  then EventAggregator::MessageJob.new.async.perform(message.data.clone, l[1])
-					when [false, true]  then EventAggregator::MessageJob.new.perform(message.data, l[1])
-					when [false, false] then EventAggregator::MessageJob.new.perform(message.data.clone, l[1])
+					when [false, true]  then EventAggregator::MessageJob.new.perform(      message.data,       l[1])
+					when [false, false] then EventAggregator::MessageJob.new.perform(      message.data.clone, l[1])
 					end
 				end
 			end
