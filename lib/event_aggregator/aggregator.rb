@@ -50,6 +50,8 @@ module EventAggregator
 		# 		  who has registered for this message type.
 		#
 		# message - The message to be distributed to the listeners.
+		# async - true => message will be sent async. Default true
+		# consisten_data - true => the same object will be sent to all recievers. Default false
 		def self.message_publish ( message, async = true, consisten_data = false )
 			raise "Invalid message" unless message.respond_to?(:message_type) && message.respond_to?(:data)
 			@@listeners[message.message_type].each do |l|
