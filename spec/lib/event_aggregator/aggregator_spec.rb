@@ -210,12 +210,12 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.register(listener, message_type, callback1)
 				EventAggregator::Aggregator.register(listener2, message_type, callback2)
 				
-				message = EventAggregator::Message.new(message_type, data)
+				message = EventAggregator::Message.new(message_type, data, false, true)
 
 				expect(callback1).to receive(:call) {|arg| expect(arg).to equal(data)}
 				expect(callback2).to receive(:call) {|arg| expect(arg).to equal(data)}
 
-				EventAggregator::Aggregator.message_publish(message, false, true)
+				EventAggregator::Aggregator.message_publish(message)
 			end
 			it 'uses different objects when false' do
 				listener2 = listener_class.new
@@ -225,12 +225,12 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.register(listener, message_type, callback1)
 				EventAggregator::Aggregator.register(listener2, message_type, callback2)
 				
-				message = EventAggregator::Message.new(message_type, data)
+				message = EventAggregator::Message.new(message_type, data, false, false)
 
 				expect(callback1).to receive(:call) {|arg| expect(arg).to_not equal(data)}
 				expect(callback2).to receive(:call) {|arg| expect(arg).to_not equal(data)}
 
-				EventAggregator::Aggregator.message_publish(message, false, false)
+				EventAggregator::Aggregator.message_publish(message)
 			end
 			it 'objects have same values when false' do
 				listener2 = listener_class.new
@@ -240,12 +240,12 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.register(listener, message_type, callback1)
 				EventAggregator::Aggregator.register(listener2, message_type, callback2)
 				
-				message = EventAggregator::Message.new(message_type, data)
+				message = EventAggregator::Message.new(message_type, data, false, false)
 
 				expect(callback1).to receive(:call) {|arg| expect(arg).to eq(data)}
 				expect(callback2).to receive(:call) {|arg| expect(arg).to eq(data)}
 
-				EventAggregator::Aggregator.message_publish(message, false, false)
+				EventAggregator::Aggregator.message_publish(message)
 			end
 		end
 	end

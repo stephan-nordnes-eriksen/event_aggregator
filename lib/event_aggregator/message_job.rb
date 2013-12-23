@@ -10,9 +10,10 @@ module EventAggregator
 		#
 		# data - The data that will be sent to the callback, originating 
 		# from a message.
-		# callback -The callback that will be processed with the data as 
+		# callback - The callback that will be processed with the data as 
 		# a parameter
 		def perform(data, callback)
+			raise "Illegal callback" unless callback.respond_to? :call
 			callback.call(data)
 		end
 	end
