@@ -9,69 +9,13 @@ module EventAggregator
 	# 		...
 	# 		def initialize()
 	# 			...
-	# 			message_type_to_receive_add( "foo", lambda{ puts "bar" } )
+	# 			message_type_register( "foo", lambda{ puts "bar" } )
 	# 		end
 	# 		...
 	#  	end
 	#
 	module Listener
-
-		#event_listener_listens_to = Hash.new() #This actually sets Listener.event_listener_listens_to = Hash.new, not the instance
-
-
-		# Public: This is the callback method when the module is extended.
-		# Using this to setup the last few things before the event listener can start.
-		#
-		# base - The class object for the class extening the Listener module
-		#
-		# Returns nil
-		def self.extended(base)
-			# Initialize module.
-			#		add_auto_register_procedure(base) #Depricated now, but it is utterly awesome that you can do this.
-		end
-
-		# Public: This is the callback method when the module is included.
-		# Using this to setup the last few things before the event listener can start.
-		#
-		# base - The class object for the class including the Listener module
-		#
-		# Returns nil
-		def self.included(base)
-			# Initialize module.
-			#		add_auto_register_procedure(base) #Depricated now, but it is utterly awesome that you can do this.
-		end
-
-
-		# Public: DEPRICATED: Adding extra initialize to the class so that we make sure new objects are added to the EventAggregators registry.
-		# This whole hack-deal is possibly not nescessary. Can be omited with a simple "register" when you add a new "receive message_type"
-		#
-		# base - The class object for the class including the Listener module
-		#
-		# Returns nil
-		def self.add_auto_register_procedure(base)
-			base.class_eval do
-				# back up method's name
-				alias_method :old_initialize, :initialize
-
-				# replace the old method with a new version which adds the Aggregator registry
-				def initialize(*args)
-					Aggregator.register self
-					old_initialize(*args)
-				end
-			end
-		end
-
-		def receive_message( message )
-			m = event_listener_listens_to[message.message_type]
-
-			m.call(message.data) if m.respond_to? :call #Should not need the check here, however who knows what kind of conurrency issues we might have.
-			#This will probably become hotpath, so having the extra check can be problematic.
-		end
-
 		private
-		def event_listener_listens_to
-			@event_listener_listens_to ||= Hash.new
-		end
 		# public: Use to add message types you want to receive. Overwirte existing callback when existing message type is given.
 		#
 		# message_type 	- A string indicating the message type you want to receive from the event aggregrator. Can actually be anything.
@@ -79,13 +23,12 @@ module EventAggregator
 		#
 		# Examples
 		#
-		#   message_type_to_receive_add("foo", method(:my_class_method))
-		#   message_type_to_receive_add("foo", lambda { puts "foo" })
-		#   message_type_to_receive_add("foo", Proc.new { puts "foo" })
+		#   message_type_register("foo", method(:my_class_method))
+		#   message_type_register("foo", lambda { puts "foo" })
+		#   message_type_register("foo", Proc.new { puts "foo" })
 		#
-		def message_type_to_receive_add( message_type, callback )
-			event_listener_listens_to[message_type] = callback #unless event_listener_listens_to[message_type] #It makes more sence to overwrite in the case it already exists.
-			Aggregator.register( self, message_type )
+		def message_type_register( message_type, callback )
+			Aggregator.register( self, message_type, callback)
 		end
 
 		# Public: Used to remove a certain type of message from your listening types. Messages of this specific type will no longer
@@ -95,10 +38,9 @@ module EventAggregator
 		#
 		# Examples
 		#
-		#   message_type_to_receive_remove("foo")
+		#   message_type_unregister("foo")
 		#
-		def message_type_to_receive_remove( message_type )
-			event_listener_listens_to[message_type] = nil
+		def message_type_unregister( message_type )
 			Aggregator.unregister(self, message_type)
 		end
 	end

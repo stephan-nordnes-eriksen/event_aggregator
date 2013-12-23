@@ -16,7 +16,7 @@ FactoryGirl.define do
 	end
 	factory :message do
 		message_type { Faker::Name.name }
-		data { Faker::Commerce.product_name } #TODO: This bracket should be unnescecary
+		data { Faker::Commerce.product_name } 
 		#initialize_with(Faker::Name.name, Faker::Name.name)
 	end
 end

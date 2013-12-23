@@ -5,25 +5,20 @@ describe EventAggregator::Message do
 		let(:message_type) {Faker::Name.name}
 		let(:data)         {Faker::Name.name}
 		let(:listener_class) { (Class.new { include EventAggregator::Listener }) }
+		let(:callback)		 { lambda{ |data| } }
 
     	before(:each) do
 			EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
 			@listener_one = listener_class.new
 			@listener_two = listener_class.new
 			
-			EventAggregator::Aggregator.register(@listener_one, message_type)
-			EventAggregator::Aggregator.register(@listener_two, message_type+" different")
+			EventAggregator::Aggregator.register(@listener_one, message_type, callback)
+			EventAggregator::Aggregator.register(@listener_two, message_type+" different", callback)
 		end
 
-    	it 'should be received by a correct subscribers' do
+    	it 'should invoke message_publish on aggregator' do
     		message = EventAggregator::Message.new(message_type, data)
-    		expect(@listener_one).to receive(:receive_message).with(message)
-    		expect(@listener_two).to_not receive(:receive_message)
-
-    		message.publish
-    	end
-    	it 'should be published to the aggregator' do
-    		message = EventAggregator::Message.new(message_type, data)
+    		
     		expect(EventAggregator::Aggregator).to receive(:message_publish).with(message)
 
     		message.publish

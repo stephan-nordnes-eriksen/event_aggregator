@@ -2,6 +2,8 @@ require "rubygems"
 require "bundler/setup"
 require "factory_girl"
 require "faker"
+require "sucker_punch"
+require "sucker_punch/testing/inline"
 
 require "event_aggregator"
 
