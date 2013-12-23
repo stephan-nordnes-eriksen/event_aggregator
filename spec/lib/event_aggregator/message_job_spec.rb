@@ -19,6 +19,7 @@ describe EventAggregator::MessageJob do
 				expect{message_job.perform(data, "string")}.to    raise_error
 				expect{message_job.perform(data, 2.0)}.to         raise_error
 				expect{message_job.perform(data, message_job)}.to raise_error
+				expect{message_job.perform(data, nil)}.to         raise_error
 			end
 		end
 	end

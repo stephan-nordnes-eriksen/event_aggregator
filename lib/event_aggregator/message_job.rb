@@ -13,6 +13,7 @@ module EventAggregator
 		# callback - The callback that will be processed with the data as 
 		# a parameter
 		def perform(data, callback)
+			#TODO: Consider removing raise error here because it is craching actors/workers.
 			raise "Illegal callback" unless callback.respond_to? :call
 			callback.call(data)
 		end
