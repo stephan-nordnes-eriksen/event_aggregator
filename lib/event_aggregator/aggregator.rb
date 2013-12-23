@@ -22,6 +22,7 @@ module EventAggregator
 		# message_type - The message type to recieve. Can be anything except nil.
 		# 				 Often it is preferable to use a string eg. "Message Type".
 		def self.register( listener, message_type, callback )
+			raise "Illegal callback" unless callback.respond_to?(:call)
 			@@listeners[message_type] << [listener, callback] unless ! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)
 		end
 
@@ -55,11 +56,13 @@ module EventAggregator
 		def self.message_publish ( message )
 			raise "Invalid message" unless message.respond_to?(:message_type) && message.respond_to?(:data)
 			@@listeners[message.message_type].each do |l|
-				case [message.async, message.consisten_data]
-				when [true, true]   then EventAggregator::MessageJob.new.async.perform(message.data,       l[1])
-				when [true, false]  then EventAggregator::MessageJob.new.async.perform(message.data.clone, l[1])
-				when [false, true]  then EventAggregator::MessageJob.new.perform(      message.data,       l[1])
-				when [false, false] then EventAggregator::MessageJob.new.perform(      message.data.clone, l[1])
+				if l[1].respond_to? :call
+					case [message.async, message.consisten_data]
+					when [true, true]   then EventAggregator::MessageJob.new.async.perform(message.data,       l[1])
+					when [true, false]  then EventAggregator::MessageJob.new.async.perform(message.data.clone, l[1])
+					when [false, true]  then EventAggregator::MessageJob.new.perform(      message.data,       l[1])
+					when [false, false] then EventAggregator::MessageJob.new.perform(      message.data.clone, l[1])
+					end
 				end
 			end
 		end
