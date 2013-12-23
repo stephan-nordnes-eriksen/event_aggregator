@@ -59,11 +59,11 @@ Message.publish is asynchronous by default. To make it synchronous (not recommen
 	EventAggregator::Message.new("foo2", "data", false).publish
 	#=> data
 
-The message data is duplicated by default for each of the receiving listeners. To force the same object for all listeners, set the consisten_data property.
+The message data is duplicated by default for each of the receiving listeners. To force the same object for all listeners, set the consisten_data property to true.
 
 	EventAggregator::Message.new("foo2", "data", true, true).publish
 	
-This enables you to do the following:
+This enables the following:
 
 	class Foo
 		include EventAggregator::Listener
