@@ -1,6 +1,6 @@
 # EventAggregator gem
 
-The gem 'event_aggregator' is designed for usie with the event aggregator pattern in Ruby.
+The gem 'event_aggregator' is designed for use with the event aggregator pattern in Ruby.
 
 ## Installation
 
@@ -54,16 +54,16 @@ Or install it yourself as:
 	#=> data2
 	#=> data
 
-Message.publish is async by default. To make it synchroneus (not recommended) use the following:
+Message.publish is asynchronous by default. To make it synchronous (not recommended) use the following:
 
 	EventAggregator::Message.new("foo2", "data", false).publish
 	#=> data
 
-The message data is duplicated by default for each of the receiving listeners. To force the same object for all listeners, set the consisten_data property.
+The message data is duplicated by default for each of the receiving listeners. To force the same object for all listeners, set the consisten_data property to true.
 
 	EventAggregator::Message.new("foo2", "data", true, true).publish
 	
-This enables you to do the following:
+This enables the following:
 
 	class Foo
 		include EventAggregator::Listener
@@ -83,12 +83,12 @@ This enables you to do the following:
 
 
 ## Usage Considerations
-All messages are processed async by default. This means that there might be raise conditions in your code. 
+All messages are processed asynchronous by default. This means that there might be raise conditions in your code. 
 
-If you force synchroneus message publishing you should take extra care of where in your code you produce new messages. You can very easily create infinite loops where messages are published and consumed by the same listener. Because of this it is adivised not to produce messages within the callback for the listener, even when using async message publishing. Another good rule is never to produce messages of the same type as those you listen to. This does not completely guard you, as there can still exist loops between two or more listeners.
+If you force synchronous message publishing you should take extra care of where in your code you produce new messages. You can very easily create infinite loops where messages are published and consumed by the same listener. Because of this it is advised not to produce messages within the callback for the listener, even when using asynchronous message publishing. Another good rule is never to produce messages of the same type as those you listen to. This does not completely guard you, as there can still exist loops between two or more listeners.
 
 ## About Event Aggregators
-An event aggregator is essentially a message passing service that aims at decoupeling objects in your code. This is achieved with messages that has a type and some data. A message might be produced when an event, or other condition, occurs within one object or class that might be of interest to thers. This object or class then put all relevant data into the message and publishes it. This message will then be distributed to all other objects that want to recieve this message type. This way the object or class that first got knowledge of the condition do not need to be aware of every other object that might be interested in knowing about this. It also removes the need for this class to implement any listeners and so forth. This way the listener, the receiver of the message, does not need to know that the sender even exists. This will help your code be a lot cleaner and remove a lot of bug-producing couplings between objects.
+An event aggregator is essentially a message passing service that aims at decoupling objects in your code. This is achieved with messages that has a type and some data. A message might be produced when an event, or other condition, occurs. When such conditions occurs a message can be produced with all relevant data in it. This message can then be published. The message will then be distributed to all other objects that want to receive this message type. This way the object or class that produced the message do not need to be aware of every other object that might be interested in the condition that just occurred. It also removes the need for this class to implement any consumer producer pattern or other similar methods to solving this problem. With an event aggregator the listener, the receiver of the message, does not need to know that the sender even exists. This will remove a lot of bug-producing couplings between objects and help your code become cleaner.
 
 For more information see: http://martinfowler.com/eaaDev/EventAggregator.html 
 

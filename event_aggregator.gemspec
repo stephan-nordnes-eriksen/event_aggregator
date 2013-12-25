@@ -24,5 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'factory_girl'
   spec.add_development_dependency 'faker'
   
-  spec.add_runtime_dependency 'sucker_punch', "~> 1.0"
+  spec.add_dependency 'sucker_punch', "~> 1.0"
 end

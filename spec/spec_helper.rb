@@ -2,10 +2,10 @@ require "rubygems"
 require "bundler/setup"
 require "factory_girl"
 require "faker"
-require "sucker_punch"
+require "event_aggregator"
 require "sucker_punch/testing/inline"
 
-require "event_aggregator"
+
 
 RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true
