@@ -68,18 +68,29 @@ This enables the following:
 	class Foo
 		include EventAggregator::Listener
 		def initialize()
-			message_type_register( "foo", lambda{|data| data = data + " bar" } )
+			message_type_register( "foo", lambda{|data| data << " bar" } )
 		end
 	end
 
 	f1 = Foo.new
 	f2 = Foo.new
 	data = "foo"
+	
+	EventAggregator::Message.new("foo", data, true, false).publish
 
-	EventAggregator::Message.new("foo", data).publish
+	puts data 
+	#=> "foo"
+
+	EventAggregator::Message.new("foo", data, true, true).publish
 	
 	puts data
 	#=> "foo bar bar"
+
+	EventAggregator::Message.new("foo", data, true, true).publish
+	
+	puts data
+	#=> "foo bar bar bar bar"
+
 
 
 ## Usage Considerations
