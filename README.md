@@ -34,6 +34,10 @@ Or install it yourself as:
 		def handle_message(data)
 			puts data
 		end
+		
+		def foo_unregister(*args)
+			message_type_unregister(*args)
+		end
 	end
 
 	f = Foo.new
@@ -43,25 +47,25 @@ Or install it yourself as:
 	EventAggregator::Message.new("foo2", "data").publish
 	#=> data
 	EventAggregator::Message.new("foo3", "data").publish
-	#=> 
-	f.message_type_unregister("foo2")
+	#=> []
+	f.foo_unregister("foo2")
 	EventAggregator::Message.new("foo2", "data").publish
-	#=>
+	#=> []
 	
 	#Possible outcome:
-	EventAggregator::Message.new("foo2", "data").publish
-	EventAggregator::Message.new("foo2", "data2").publish
+	EventAggregator::Message.new("foo", "data").publish
+	EventAggregator::Message.new("foo", "data2").publish
 	#=> data2
 	#=> data
 
 Message.publish is asynchronous by default. To make it synchronous (not recommended) use the following:
 
-	EventAggregator::Message.new("foo2", "data", false).publish
+	EventAggregator::Message.new("foo", "data", false).publish
 	#=> data
 
 The message data is duplicated by default for each of the receiving listeners. To force the same object for all listeners, set the consisten_data property to true.
 
-	EventAggregator::Message.new("foo2", "data", true, true).publish
+	EventAggregator::Message.new("foo", "data", true, true).publish
 	
 This enables the following:
 
