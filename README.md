@@ -75,11 +75,22 @@ This enables the following:
 	f1 = Foo.new
 	f2 = Foo.new
 	data = "foo"
+	
+	EventAggregator::Message.new("foo", data, true, false).publish
+
+	puts data 
+	#=> "foo"
 
 	EventAggregator::Message.new("foo", data, true, true).publish
 	
 	puts data
 	#=> "foo bar bar"
+
+	EventAggregator::Message.new("foo", data, true, true).publish
+	
+	puts data
+	#=> "foo bar bar bar bar"
+
 
 
 ## Usage Considerations
