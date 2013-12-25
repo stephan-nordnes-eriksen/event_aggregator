@@ -26,7 +26,7 @@ Or install it yourself as:
 	class Foo
 		include EventAggregator::Listener
 		def initialize()
-			message_type_register( "foo", lambda{|data| puts "bar" } )
+			message_type_register( "foo", lambda{|data| puts data } )
 
 			message_type_register( "foo2", method(:handle_message) )
 		end
@@ -42,7 +42,7 @@ Or install it yourself as:
 
 	f = Foo.new
 
-	EventAggregator::Message.new("foo", "data").publish
+	EventAggregator::Message.new("foo", "bar").publish
 	#=> bar
 	EventAggregator::Message.new("foo2", "data").publish
 	#=> data
