@@ -4,8 +4,8 @@ describe EventAggregator::Aggregator do
 	let(:listener)       { (Class.new { include EventAggregator::Listener }).new }
 	let(:listener_class) { Class.new { include EventAggregator::Listener }}
 	let(:message_type)   { Faker::Name.name }
-	let(:data)   		 { Faker::Name.name }
-	let(:callback)		 { lambda{ |data| } }
+	let(:data)           { Faker::Name.name }
+	let(:callback)       { lambda{ |data| } }
 
 	before(:each) do
 		EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
