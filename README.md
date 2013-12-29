@@ -2,7 +2,6 @@
 
 
 [![Gem Version](https://badge.fury.io/rb/event_aggregator.png)][gem]
-
 [![Build Status](https://travis-ci.org/stephan-nordnes-eriksen/event_aggregator.png?branch=master)][travis]
 [![Dependency Status](https://gemnasium.com/stephan-nordnes-eriksen/event_aggregator.png)][gemnasium]
 [![Code Climate](https://codeclimate.com/github/stephan-nordnes-eriksen/event_aggregator.png)][codeclimate]
