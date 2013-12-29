@@ -1,4 +1,3 @@
-bundler_args: --without development
 gemfile:
   - Gemfile
 language: ruby
