@@ -219,8 +219,8 @@ describe EventAggregator::Aggregator do
 			end
 			it 'uses different objects when false' do
 				listener2 = listener_class.new
-				callback1 = lambda{|data| data ="no"}
-				callback2 = lambda{|data| data ="no"}
+				callback1 = lambda{|data| data = "no"}
+				callback2 = lambda{|data| data = "no"}
 
 				EventAggregator::Aggregator.register(listener, message_type, callback1)
 				EventAggregator::Aggregator.register(listener2, message_type, callback2)

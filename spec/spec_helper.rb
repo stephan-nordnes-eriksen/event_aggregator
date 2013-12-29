@@ -1,6 +1,5 @@
 require "rubygems"
 require "bundler/setup"
-require "factory_girl"
 require "faker"
 require "event_aggregator"
 require "sucker_punch/testing/inline"
@@ -17,7 +16,4 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = "random"
-
-
-  FactoryGirl.find_definitions
 end
