@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Event Aggregator : A Ruby event aggregator gem." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Event Aggregator</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/stephan-nordnes-eriksen/event_aggregator">View on GitHub</a>
+
+          <h1 id="project_title">Event Aggregator</h1>
+          <h2 id="project_tagline">A Ruby event aggregator gem.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/stephan-nordnes-eriksen/event_aggregator/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/stephan-nordnes-eriksen/event_aggregator/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="eventaggregator-gem" class="anchor" href="#eventaggregator-gem"><span class="octicon octicon-link"></span></a>EventAggregator gem</h1>
+
+<p>The gem 'event_aggregator' is designed for use with the event aggregator pattern in Ruby.</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<pre><code>gem 'event_aggregator'
+</code></pre>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre><code>$ gem install event_aggregator
+</code></pre>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<pre><code>#!/usr/bin/ruby
+
+require "rubygems"
+require "event_aggregator"
+
+class Foo
+    include EventAggregator::Listener
+    def initialize()
+        message_type_register( "foo", lambda{|data| puts data } )
+
+        message_type_register( "foo2", method(:handle_message) )
+    end
+
+    def handle_message(data)
+        puts data
+    end
+
+    def foo_unregister(*args)
+        message_type_unregister(*args)
+    end
+end
+
+f = Foo.new
+
+EventAggregator::Message.new("foo", "bar").publish
+#=&gt; bar
+EventAggregator::Message.new("foo2", "data").publish
+#=&gt; data
+EventAggregator::Message.new("foo3", "data").publish
+#=&gt; []
+f.foo_unregister("foo2")
+EventAggregator::Message.new("foo2", "data").publish
+#=&gt; []
+
+#Possible outcome:
+EventAggregator::Message.new("foo", "data").publish
+EventAggregator::Message.new("foo", "data2").publish
+#=&gt; data2
+#=&gt; data
+</code></pre>
+
+<h3>
+<a name="important-asynchronous-by-default" class="anchor" href="#important-asynchronous-by-default"><span class="octicon octicon-link"></span></a>IMPORTANT: Asynchronous by Default</h3>
+
+<p>Message.publish is asynchronous by default. This means that if you run event_aggregator in a script that terminates, there is a chance that the script will terminate before the workers have processed the messages and you can receive an error looking like the following: </p>
+
+<pre><code>W, [2013-12-29T11:17:29.659902 #48097]  WARN -- : Terminating task: type=:call, meta={:method_name=&gt;:perform}, status=:callwait
+D, [2013-12-29T11:17:29.660142 #48097] DEBUG -- : Celluloid::PoolManager: async call `perform` aborted!
+Celluloid::Task::TerminatedError: task was terminated
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:32:in `terminate'
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:404:in `block in cleanup'
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:404:in `each'
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:404:in `cleanup'
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:375:in `shutdown'
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:185:in `run'
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:157:in `block in initialize'
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/thread_handle.rb:13:in `block in initialize'
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/internal_pool.rb:100:in `call'
+    /Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/internal_pool.rb:100:in `block in create'
+W, [2013-12-29T11:17:29.660271 #48097]  WARN -- : Terminating task: type=:finalizer, meta={:method_name=&gt;:__shutdown__}, status=:callwait
+</code></pre>
+
+<p>To make it synchronous (not recommended) use the following:</p>
+
+<pre><code>EventAggregator::Message.new("foo", "data", false).publish
+#=&gt; data
+</code></pre>
+
+<p>The message data is duplicated by default for each of the receiving listeners. To force the same object for all listeners, set the consisten_data property to true.</p>
+
+<pre><code>EventAggregator::Message.new("foo", "data", true, true).publish
+</code></pre>
+
+<p>This enables the following:</p>
+
+<pre><code>class Foo
+    include EventAggregator::Listener
+    def initialize()
+        message_type_register( "foo", lambda{|data| data &lt;&lt; " bar" } )
+    end
+end
+
+f1 = Foo.new
+f2 = Foo.new
+data = "foo"
+
+EventAggregator::Message.new("foo", data, true, false).publish
+
+puts data 
+#=&gt; "foo"
+
+EventAggregator::Message.new("foo", data, true, true).publish
+
+puts data
+#=&gt; "foo bar bar"
+
+EventAggregator::Message.new("foo", data, true, true).publish
+
+puts data
+#=&gt; "foo bar bar bar bar"
+</code></pre>
+
+<h2>
+<a name="usage-considerations" class="anchor" href="#usage-considerations"><span class="octicon octicon-link"></span></a>Usage Considerations</h2>
+
+<p>All messages are processed asynchronous by default. This means that there might be raise conditions in your code. </p>
+
+<p>If you force synchronous message publishing you should take extra care of where in your code you produce new messages. You can very easily create infinite loops where messages are published and consumed by the same listener. Because of this it is advised not to produce messages within the callback for the listener, even when using asynchronous message publishing. Another good rule is never to produce messages of the same type as those you listen to. This does not completely guard you, as there can still exist loops between two or more listeners.</p>
+
+<h2>
+<a name="about-event-aggregators" class="anchor" href="#about-event-aggregators"><span class="octicon octicon-link"></span></a>About Event Aggregators</h2>
+
+<p>An event aggregator is essentially a message passing service that aims at decoupling objects in your code. This is achieved with messages that has a type and some data. A message might be produced when an event, or other condition, occurs. When such conditions occurs a message can be produced with all relevant data in it. This message can then be published. The message will then be distributed to all other objects that want to receive this message type. This way the object or class that produced the message do not need to be aware of every other object that might be interested in the condition that just occurred. It also removes the need for this class to implement any consumer producer pattern or other similar methods to solving this problem. With an event aggregator the listener, the receiver of the message, does not need to know that the sender even exists. This will remove a lot of bug-producing couplings between objects and help your code become cleaner.</p>
+
+<p>For more information see: <a href="http://martinfowler.com/eaaDev/EventAggregator.html">http://martinfowler.com/eaaDev/EventAggregator.html</a> </p>
+
+<p>Or: <a href="https://www.google.com/#q=event+aggregator">https://www.google.com/#q=event+aggregator</a></p>
+
+<h2>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>Todo:</h2>
+
+<ul>
+<li>Improving the readme and documentation in the gem.</li>
+</ul><h2>
+<a name="versioning-standard" class="anchor" href="#versioning-standard"><span class="octicon octicon-link"></span></a>Versioning Standard:</h2>
+
+<p>Using Semantic Versioning - <a href="http://semver.org/">http://semver.org/</a></p>
+
+<h3>
+<a name="versioning-summary" class="anchor" href="#versioning-summary"><span class="octicon octicon-link"></span></a>Versioning Summary</h3>
+
+<h4>
+<a name="00x---patch" class="anchor" href="#00x---patch"><span class="octicon octicon-link"></span></a>0.0.X - Patch</h4>
+
+<pre><code>Small updates and patches that are backwards-compatible. Updating from 0.0.X -&gt; 0.0.Y should not break your code.
+</code></pre>
+
+<h4>
+<a name="0x---minor" class="anchor" href="#0x---minor"><span class="octicon octicon-link"></span></a>0.X - Minor</h4>
+
+<pre><code>Adding functionality and changes that are backwards-compatible. Updating from 0.X -&gt; 0.Y should not break your code.
+</code></pre>
+
+<h4>
+<a name="x---major" class="anchor" href="#x---major"><span class="octicon octicon-link"></span></a>X - Major</h4>
+
+<pre><code>Architectural changes and other major changes that alter the API. Updating from X -&gt; Y will most likely break your code.
+</code></pre>
+
+<h2>
+<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<ol>
+<li>Fork it</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create new Pull Request</li>
+</ol>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Event Aggregator maintained by <a href="https://github.com/stephan-nordnes-eriksen">stephan-nordnes-eriksen</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
