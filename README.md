@@ -5,14 +5,14 @@
 [![Build Status](https://travis-ci.org/stephan-nordnes-eriksen/event_aggregator.png?branch=adding_travis_and_other)][travis]
 [![Dependency Status](https://gemnasium.com/stephan-nordnes-eriksen/event_aggregator.png)][gemnasium]
 [![Code Climate](https://codeclimate.com/github/stephan-nordnes-eriksen/event_aggregator.png)][codeclimate]
-[![Coverage Status](https://coveralls.io/repos/intridea/omniauth/badge.png?branch=master)][coveralls]
+[![Coverage Status](https://coveralls.io/repos/stephan-nordnes-eriksen/event_aggregator/badge.png)][coveralls]
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/stephan-nordnes-eriksen/event_aggregator/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 [gem]: https://rubygems.org/gems/event_aggregator
 [travis]: https://travis-ci.org/stephan-nordnes-eriksen/event_aggregator
 [gemnasium]: https://gemnasium.com/stephan-nordnes-eriksen/event_aggregator
 [codeclimate]: https://codeclimate.com/github/stephan-nordnes-eriksen/event_aggregator
-[coveralls]: https://coveralls.io/r/intridea/omniauth
+[coveralls]: https://coveralls.io/r/stephan-nordnes-eriksen/event_aggregator
 
 
 The gem 'event_aggregator' is designed for use with the event aggregator pattern in Ruby.
