@@ -58,7 +58,25 @@ Or install it yourself as:
 	#=> data2
 	#=> data
 
-Message.publish is asynchronous by default. To make it synchronous (not recommended) use the following:
+### IMPORTANT: Asynchronous by Default
+Message.publish is asynchronous by default. This means that if you run event_aggregator in a script that terminates, there is a chance that the script will terminate before the workers have processed the messages and you can receive an error looking like the following: 
+	
+	W, [2013-12-29T11:17:29.659902 #48097]  WARN -- : Terminating task: type=:call, meta={:method_name=>:perform}, status=:callwait
+	D, [2013-12-29T11:17:29.660142 #48097] DEBUG -- : Celluloid::PoolManager: async call `perform` aborted!
+	Celluloid::Task::TerminatedError: task was terminated
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:32:in `terminate'
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:404:in `block in cleanup'
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:404:in `each'
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:404:in `cleanup'
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:375:in `shutdown'
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:185:in `run'
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:157:in `block in initialize'
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/thread_handle.rb:13:in `block in initialize'
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/internal_pool.rb:100:in `call'
+		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/internal_pool.rb:100:in `block in create'
+	W, [2013-12-29T11:17:29.660271 #48097]  WARN -- : Terminating task: type=:finalizer, meta={:method_name=>:__shutdown__}, status=:callwait
+
+To make it synchronous (not recommended) use the following:
 
 	EventAggregator::Message.new("foo", "data", false).publish
 	#=> data
