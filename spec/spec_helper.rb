@@ -1,7 +1,7 @@
 require "rubygems"
 require "bundler/setup"
 require 'rspec'
-require 'rack/test'
+#require 'rack/test'
 require "faker"
 require "event_aggregator"
 require "sucker_punch/testing/inline"
