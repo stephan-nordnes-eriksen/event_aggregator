@@ -3,7 +3,8 @@ require "bundler/setup"
 require "faker"
 require "event_aggregator"
 require "sucker_punch/testing/inline"
-
+require 'coveralls'
+Coveralls.wear!
 
 
 RSpec.configure do |config|

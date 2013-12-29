@@ -1,5 +1,20 @@
 # EventAggregator gem
 
+
+[![Gem Version](https://badge.fury.io/rb/event_aggregator.png)][gem]
+[![CI Build Status](https://secure.travis-ci.org/intridea/omniauth.png?branch=master)][travis]
+[![Dependency Status](https://gemnasium.com/stephan-nordnes-eriksen/event_aggregator.png)][gemnasium]
+[![Code Climate](https://codeclimate.com/github/stephan-nordnes-eriksen/event_aggregator.png)][codeclimate]
+[![Coverage Status](https://coveralls.io/repos/intridea/omniauth/badge.png?branch=master)][coveralls]
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/stephan-nordnes-eriksen/event_aggregator/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
+[gem]: https://rubygems.org/gems/event_aggregator
+[travis]: http://travis-ci.org/intridea/omniauth
+[gemnasium]: https://gemnasium.com/stephan-nordnes-eriksen/event_aggregator
+[codeclimate]: https://codeclimate.com/github/stephan-nordnes-eriksen/event_aggregator
+[coveralls]: https://coveralls.io/r/intridea/omniauth
+
+
 The gem 'event_aggregator' is designed for use with the event aggregator pattern in Ruby.
 
 ## Installation
