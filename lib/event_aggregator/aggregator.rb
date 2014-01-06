@@ -14,7 +14,7 @@ module EventAggregator
 
 		@@listeners = Hash.new{|h, k| h[k] = []}
 		@@listeners_all = Hash.new
-		
+
 		# Public: Register an EventAggregator::Listener to receive
 		# 		  a specified message type
 		#
@@ -57,7 +57,7 @@ module EventAggregator
 		end
 
 		# Public: As Unregister, but will unregister listener from all message types.
-		#
+		#!
 		# listener - The listener who should no longer get any messages at all,
 		# 			 regardless of type.
 		def self.unregister_all( listener )
@@ -85,6 +85,7 @@ module EventAggregator
 					end
 				end
 			end
+			#TODO: Consider refactoring this, and the above, into a separate, hopefully private, method:
 			@@listeners_all.each do |listener,callback|
 				case [message.async, message.consisten_data]
 				when [true, true]   then EventAggregator::MessageJob.new.async.perform(message,       callback)
