@@ -54,6 +54,10 @@ module EventAggregator
 			Aggregator.unregister(self, message_type)
 		end
 
+		
+		# Public: Will unregister the listener from all message types as well as the message_type_register_all.
+		# Listener will no longer recieve any callbacks when messages of any kind are published.
+		#
 		def message_type_unregister_all
 			Aggregator.unregister_all(self)
 		end
