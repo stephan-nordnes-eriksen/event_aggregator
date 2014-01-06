@@ -13,7 +13,7 @@ module EventAggregator
 		class <<self; private :new; end
 
 		@@listeners = Hash.new{|h, k| h[k] = []}
-
+		@@listeners_all = Hash.new
 		# Public: Register an EventAggregator::Listener to recieve
 		# 		  a specified message type
 		#
@@ -24,6 +24,11 @@ module EventAggregator
 		def self.register( listener, message_type, callback )
 			raise "Illegal callback" unless callback.respond_to?(:call)
 			@@listeners[message_type] << [listener, callback] unless ! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)
+		end
+
+		def self.register_all( listener, callback )
+			raise "Illegal callback" unless callback.respond_to?(:call)
+			@@listeners_all[listener] = callback unless ! (listener.class < EventAggregator::Listener) || @@listeners_all.include?(listener)
 		end
 
 		# Public: Unegister an EventAggregator::Listener to a
@@ -45,6 +50,7 @@ module EventAggregator
 			@@listeners.each do |e|
 				e[1].delete_if{|value| value[0] == listener}
 			end
+			@@listeners_all.delete(listener)
 		end
 
 		# Public: Will publish the specified message to all listeners
@@ -63,6 +69,14 @@ module EventAggregator
 					when [false, true]  then EventAggregator::MessageJob.new.perform(      message.data,       l[1])
 					when [false, false] then EventAggregator::MessageJob.new.perform(      message.data.clone, l[1])
 					end
+				end
+			end
+			@@listeners_all.each do |listener,callback|
+				case [message.async, message.consisten_data]
+				when [true, true]   then EventAggregator::MessageJob.new.async.perform(message,       callback)
+				when [true, false]  then EventAggregator::MessageJob.new.async.perform(message.clone, callback)
+				when [false, true]  then EventAggregator::MessageJob.new.perform(      message,       callback)
+				when [false, false] then EventAggregator::MessageJob.new.perform(      message.clone, callback)
 				end
 			end
 		end

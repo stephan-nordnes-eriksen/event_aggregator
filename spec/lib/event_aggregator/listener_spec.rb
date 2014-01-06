@@ -3,6 +3,10 @@ require 'spec_helper'
 
 # Public: Some ruby trickery to be able to test private methods
 #
+# Example:
+# whatever_object.class.publicize_methods do
+# #... execute private methods
+# end
 class Class
   def publicize_methods
     saved_private_instance_methods = self.private_instance_methods
@@ -13,18 +17,19 @@ class Class
 end
 
 describe EventAggregator::Listener do
-	let(:listener)       { (Class.new { include EventAggregator::Listener }).new }
-	let(:listener_class) { Class.new { include EventAggregator::Listener } }
-	let(:message_type)   { Faker::Name.name }
-	let(:lambda_method)  { lambda { |data| }}
-	let(:data)  		 { Faker::Name.name }
+	let(:listener)           { (Class.new { include EventAggregator::Listener }).new }
+	let(:listener_class)     { Class.new { include EventAggregator::Listener } }
+	let(:message_type)       { Faker::Name.name }
+	let(:lambda_method)      { lambda { |data| } }
+	let(:data)  		     { Faker::Name.name }
+	let(:recieve_all_method) { lambda { |message| } }
 
 	before(:each) do
 		EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
 		@message = EventAggregator::Message.new(message_type, data)
 	end
 
-	describe '.message_type_to_receive_add' do
+	describe '.message_type_register' do
 		describe 'legal parameters' do
 			it 'invoke aggregator register' do
 				expect(EventAggregator::Aggregator).to receive(:register).with(listener, message_type, lambda_method)
@@ -44,7 +49,7 @@ describe EventAggregator::Listener do
 		end
 	end
 
-	describe '.message_type_to_receive_remove' do
+	describe '.message_type_unregister' do
 		describe 'legal parameters' do
 			it 'invoke aggregator unregister' do
 				listener.class.publicize_methods do
@@ -53,6 +58,30 @@ describe EventAggregator::Listener do
 					expect(EventAggregator::Aggregator).to receive(:unregister).with(listener, message_type)
 
 					listener.message_type_unregister(message_type)
+				end
+			end
+		end
+	end
+
+	describe '.message_type_register_all' do
+		describe 'legal parameters' do
+			it 'invoke aggregator unregister_all' do
+				listener.class.publicize_methods do
+					expect(EventAggregator::Aggregator).to receive(:unregister_all).with(listener)
+
+					listener.message_type_register_all()
+				end
+			end
+		end
+	end
+
+	describe '.message_type_unregister_all' do
+		describe 'legal parameters' do
+			it 'invoke aggregator unregister' do
+				listener.class.publicize_methods do
+					expect(EventAggregator::Aggregator).to receive(:register_to_all).with(listener)
+
+					listener.message_type_unregister()
 				end
 			end
 		end

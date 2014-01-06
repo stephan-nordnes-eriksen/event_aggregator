@@ -34,9 +34,9 @@ describe EventAggregator::Aggregator do
 			end
 			it 'not allow non-listener to register' do
 				expect{EventAggregator::Aggregator.register(EventAggregator::Message.new("a","b"), message_type, callback)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
-				expect{EventAggregator::Aggregator.register("string", message_type, callback)}.to_not                              change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
-				expect{EventAggregator::Aggregator.register(1, message_type, callback)}.to_not                                     change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
-				expect{EventAggregator::Aggregator.register(2.0, message_type, callback)}.to_not                                   change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+				expect{EventAggregator::Aggregator.register("string", message_type, callback)}                             .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+				expect{EventAggregator::Aggregator.register(1, message_type, callback)}                                    .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+				expect{EventAggregator::Aggregator.register(2.0, message_type, callback)}                                  .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
 			end
 		end
 	end
@@ -54,12 +54,12 @@ describe EventAggregator::Aggregator do
 			end
 			it 'keep listener in unrelated lists' do
 				message_type2 = message_type + " different"
-				
+
 				EventAggregator::Aggregator.register(listener, message_type, callback)
 				EventAggregator::Aggregator.register(listener, message_type2, callback)
-				
+
 				EventAggregator::Aggregator.unregister(listener, message_type)
-				
+
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type2]).to include([listener, callback])
 			end
 		end
@@ -75,7 +75,7 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.register(listener1, message_type1, callback)
 				EventAggregator::Aggregator.register(listener2, message_type2, callback)
 				EventAggregator::Aggregator.register(listener3, message_type3, callback)
-				
+
 				#Touching hash
 				EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type]
 
@@ -116,7 +116,7 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.register(listener, message_type, callback)
 
 				EventAggregator::Aggregator.unregister_all(listener)
-				
+
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type]).to_not  include([listener, callback])
 			end
 			it "not unregister wrong listener" do
@@ -132,7 +132,7 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.register(listener3, message_type2, callback)
 				EventAggregator::Aggregator.register(listener4, message_type3, callback)
 
-				
+
 				EventAggregator::Aggregator.unregister_all(listener)
 
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type]).to include([listener2, callback])
@@ -152,6 +152,15 @@ describe EventAggregator::Aggregator do
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type2]).to_not include([listener, callback])
 			end
 		end
+		describe "unregistering listener registered for all" do
+			it "unregister from all" do
+				EventAggregator::Aggregator.register_all(listener, callback)
+
+				EventAggregator::Aggregator.unregister_all(listener)
+
+				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners_all)).to_not include([listener, callback])
+			end
+		end
 	end
 
 	describe "self.message_publish" do
@@ -166,7 +175,7 @@ describe EventAggregator::Aggregator do
 			end
 			it 'not run incorrect callback' do
 				message_type2 = message_type + " different"
-				
+
 				EventAggregator::Aggregator.register(listener, message_type, callback)
 				message = EventAggregator::Message.new(message_type2, data)
 
@@ -191,14 +200,71 @@ describe EventAggregator::Aggregator do
 
 				EventAggregator::Aggregator.message_publish(message)
 			end
+			it 'run all callbacks from register_all' do
+				listener2 = listener_class.new
+				callback2 = lambda{ |message| }
+				EventAggregator::Aggregator.register_all(listener, callback)
+				EventAggregator::Aggregator.register_all(listener2, callback2)
+
+				message = EventAggregator::Message.new(message_type, data, true, true)
+
+				expect(callback).to receive(:call).with(message)
+				expect(callback2).to receive(:call).with(message)
+
+				EventAggregator::Aggregator.message_publish(message)
+			end
+
+			it 'run all callbacks for all message types' do
+				EventAggregator::Aggregator.register_all(listener, callback)
+
+				message1 = EventAggregator::Message.new(message_type      , data)
+				message2 = EventAggregator::Message.new(message_type + "2", data)
+				message3 = EventAggregator::Message.new(message_type + "3", data)
+				message4 = EventAggregator::Message.new(message_type + "4", data)
+				message5 = EventAggregator::Message.new(message_type + "5", data)
+				message6 = EventAggregator::Message.new(message_type + "6", data)
+
+				expect(callback).to receive(:call) {|arg| 
+					expect(arg.message_type).to eql(message1.message_type)
+					expect(arg.data).to eql(message1.data)
+				}
+				expect(callback).to receive(:call) {|arg| 
+					expect(arg.message_type).to eql(message2.message_type)
+					expect(arg.data).to eql(message2.data)
+				}
+				expect(callback).to receive(:call) {|arg| 
+					expect(arg.message_type).to eql(message3.message_type)
+					expect(arg.data).to eql(message3.data)
+				}
+				expect(callback).to receive(:call) {|arg| 
+					expect(arg.message_type).to eql(message4.message_type)
+					expect(arg.data).to eql(message4.data)
+				}
+				expect(callback).to receive(:call) {|arg| 
+					expect(arg.message_type).to eql(message5.message_type)
+					expect(arg.data).to eql(message5.data)
+				}
+				expect(callback).to receive(:call) {|arg| 
+					expect(arg.message_type).to eql(message6.message_type)
+					expect(arg.data).to eql(message6.data)
+				}
+
+
+				EventAggregator::Aggregator.message_publish(message1)
+				EventAggregator::Aggregator.message_publish(message2)
+				EventAggregator::Aggregator.message_publish(message3)
+				EventAggregator::Aggregator.message_publish(message4)
+				EventAggregator::Aggregator.message_publish(message5)
+				EventAggregator::Aggregator.message_publish(message6)
+			end
 		end
 		describe 'illegal parameters' do
 			it 'non-message type' do
 				expect{EventAggregator::Aggregator.message_publish("string")}.to raise_error
-				expect{EventAggregator::Aggregator.message_publish(1)}.to        raise_error
+				expect{EventAggregator::Aggregator.message_publish(1)}       .to raise_error
 				expect{EventAggregator::Aggregator.message_publish(listener)}.to raise_error
-				expect{EventAggregator::Aggregator.message_publish()}.to         raise_error
-				expect{EventAggregator::Aggregator.message_publish(nil)}.to      raise_error
+				expect{EventAggregator::Aggregator.message_publish()}        .to raise_error
+				expect{EventAggregator::Aggregator.message_publish(nil)}     .to raise_error
 			end
 		end
 		describe 'consisten_data behaviour' do
@@ -209,7 +275,7 @@ describe EventAggregator::Aggregator do
 
 				EventAggregator::Aggregator.register(listener, message_type, callback1)
 				EventAggregator::Aggregator.register(listener2, message_type, callback2)
-				
+
 				message = EventAggregator::Message.new(message_type, data, false, true)
 
 				expect(callback1).to receive(:call) {|arg| expect(arg).to equal(data)}
@@ -224,7 +290,7 @@ describe EventAggregator::Aggregator do
 
 				EventAggregator::Aggregator.register(listener, message_type, callback1)
 				EventAggregator::Aggregator.register(listener2, message_type, callback2)
-				
+
 				message = EventAggregator::Message.new(message_type, data, false, false)
 
 				expect(callback1).to receive(:call) {|arg| expect(arg).to_not equal(data)}
@@ -234,18 +300,40 @@ describe EventAggregator::Aggregator do
 			end
 			it 'objects have same values when false' do
 				listener2 = listener_class.new
-				callback1 = lambda{|data| data ="no"}
-				callback2 = lambda{|data| data ="no"}
+				callback1 = lambda{|data| data = "no"}
+				callback2 = lambda{|data| data = "no"}
 
 				EventAggregator::Aggregator.register(listener, message_type, callback1)
 				EventAggregator::Aggregator.register(listener2, message_type, callback2)
-				
+
 				message = EventAggregator::Message.new(message_type, data, false, false)
 
 				expect(callback1).to receive(:call) {|arg| expect(arg).to eq(data)}
 				expect(callback2).to receive(:call) {|arg| expect(arg).to eq(data)}
 
 				EventAggregator::Aggregator.message_publish(message)
+			end
+		end
+	end
+
+	describe "self.register_all" do
+		describe 'legal parameters' do
+			it 'registered at correct place' do
+				EventAggregator::Aggregator.register_all(listener, callback)
+				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners_all)).to include(listener)
+			end
+
+			it 'not register same listener multiple times' do
+				EventAggregator::Aggregator.register_all(listener, callback)
+				expect{EventAggregator::Aggregator.register_all(listener, callback)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners_all)}
+			end
+		end
+		describe 'illegal parameters' do
+			it 'not allow non-listener to register' do
+				expect{EventAggregator::Aggregator.register_all(EventAggregator::Message.new("a","b"), callback)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+				expect{EventAggregator::Aggregator.register_all("string", callback)}                             .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+				expect{EventAggregator::Aggregator.register_all(1, callback)}                                    .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+				expect{EventAggregator::Aggregator.register_all(2.0, callback)}                                  .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
 			end
 		end
 	end

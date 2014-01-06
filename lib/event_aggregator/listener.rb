@@ -43,5 +43,9 @@ module EventAggregator
 		def message_type_unregister( message_type )
 			Aggregator.unregister(self, message_type)
 		end
+
+		def message_type_register_all
+			Aggregator.unregister_all(self)
+		end
 	end
 end
