@@ -31,6 +31,16 @@ module EventAggregator
 			Aggregator.register( self, message_type, callback)
 		end
 
+		
+		# Public: Used to register listener for all message types. Every time a message is published
+		# the provided callback will be executed with the message as the content.
+		#
+		# callback -The method that will be invoked every time this message type is received. Must have: callback.respond_to? :call #=> true
+		#
+		def message_type_register_all(callback)
+			Aggregator.register_all(self, callback)
+		end
+
 		# Public: Used to remove a certain type of message from your listening types. Messages of this specific type will no longer
 		# invoke any callbacks.
 		#
@@ -44,7 +54,7 @@ module EventAggregator
 			Aggregator.unregister(self, message_type)
 		end
 
-		def message_type_register_all
+		def message_type_unregister_all
 			Aggregator.unregister_all(self)
 		end
 	end
