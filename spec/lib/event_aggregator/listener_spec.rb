@@ -25,7 +25,7 @@ describe EventAggregator::Listener do
 	let(:recieve_all_method) { lambda { |message| } }
 
 	before(:each) do
-		EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
+		EventAggregator::Aggregator.reset
 		@message = EventAggregator::Message.new(message_type, data)
 	end
 
@@ -84,6 +84,14 @@ describe EventAggregator::Listener do
 					listener.message_type_unregister_all()
 				end
 			end
+		end
+	end
+
+	describe ".message_type_producer_register" do
+		describe 'legal parameters' do
+			expect(EventAggregator::Aggregator).to receive(:register_producer).with(message_type, callback)
+
+			listener.producer_register(message_type, callback)
 		end
 	end
 end

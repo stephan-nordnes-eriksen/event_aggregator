@@ -15,6 +15,7 @@ module EventAggregator
 		@@listeners = Hash.new{|h, k| h[k] = []}
 		@@listeners_all = Hash.new
 		@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
+		@@producers = Hash.new
 		# Public: Register an EventAggregator::Listener to receive
 		# 		  a specified message type
 		#
@@ -41,8 +42,9 @@ module EventAggregator
 		#
 		# Returns the duplicated String.
 		def self.register_all( listener, callback )
+			raise "Illegal listener" unless listener.class < EventAggregator::Listener
 			raise "Illegal callback" unless callback.respond_to?(:call)
-			@@listeners_all[listener] = callback unless ! (listener.class < EventAggregator::Listener) || @@listeners_all.include?(listener)
+			@@listeners_all[listener] = callback #TODO: Test that it is over written.
 		end
 
 		# Public: Unegister an EventAggregator::Listener to a
@@ -96,6 +98,7 @@ module EventAggregator
 			@@listeners = Hash.new{|h, k| h[k] = []}
 			@@listeners_all = Hash.new
 			@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
+			@@producers = Hash.new
 		end
 
 
@@ -106,6 +109,21 @@ module EventAggregator
 			@@message_translation[message_type][message_type_new] = callback unless @@message_translation[message_type][message_type_new] == callback
 		end
 
+		def self.register_producer(message_type, callback)
+			raise "Illegal message_type" if message_type == nil
+			raise "Illegal callback" unless callback.respond_to?(:call) && callback.parameters.count == 1
+			raise "Already defined producer" if @@producers[message_type]
+			
+			@@producers[message_type] = callback
+		end
+		#TODO: documentation
+		def self.unregister_producer(message_type)
+			@@producers.delete(message_type)
+		end
+
+		def self.message_request(message)
+			@@producers[message.message_type] ? @@producers[message.message_type].call(message.data) : nil
+		end
 		private
 		def self.perform_message_job(data, callback, async, consisten_data)
 			case [async, consisten_data]

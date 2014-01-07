@@ -47,5 +47,12 @@ module EventAggregator
 		def publish
 			Aggregator.message_publish( self )
 		end
+
+		# Public: Will provide data if a producer of this message_type is present.
+		#
+		# Returns Requested data if a producer is present. Nil otherwise.
+		def request
+			Aggregator.message_request( self )
+		end
 	end
 end
