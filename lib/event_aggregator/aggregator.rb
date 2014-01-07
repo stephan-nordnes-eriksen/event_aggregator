@@ -14,18 +14,32 @@ module EventAggregator
 
 		@@listeners = Hash.new{|h, k| h[k] = []}
 		@@listeners_all = Hash.new
-		# Public: Register an EventAggregator::Listener to recieve
+
+		# Public: Register an EventAggregator::Listener to receive
 		# 		  a specified message type
 		#
-		# listener - An EventAggregator::Listener which should recieve
+		# listener - An EventAggregator::Listener which should receive
 		# 			 the messages.
-		# message_type - The message type to recieve. Can be anything except nil.
+		# message_type - The message type to receive. Can be anything except nil.
 		# 				 Often it is preferable to use a string eg. "Message Type".
+		# callback - The callback that will be executed when messages of type equal
+		# 				message_type is published. Is executed with message.data as parameter.
+		#
 		def self.register( listener, message_type, callback )
 			raise "Illegal callback" unless callback.respond_to?(:call)
 			@@listeners[message_type] << [listener, callback] unless ! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)
 		end
 
+		
+		# Public: Register an EventAggregator::Listener to receive
+		# 		  every single message that is published.
+		#
+		# listener - An EventAggregator::Listener which should receive
+		# 			 the messages.
+		# callback - The callback that will be executed every time a message is published.
+		# 				will execute with the message as parameter.
+		#
+		# Returns the duplicated String.
 		def self.register_all( listener, callback )
 			raise "Illegal callback" unless callback.respond_to?(:call)
 			@@listeners_all[listener] = callback unless ! (listener.class < EventAggregator::Listener) || @@listeners_all.include?(listener)
@@ -35,7 +49,7 @@ module EventAggregator
 		# 		  specified message type. The listener will no
 		# 		  longer get messages of this type.
 		#
-		# listener - The EventAggregator::Listener which should no longer recieve
+		# listener - The EventAggregator::Listener which should no longer receive
 		# 			 the messages.
 		# message_type - The message type to unregister for.
 		def self.unregister( listener, message_type )
@@ -43,7 +57,7 @@ module EventAggregator
 		end
 
 		# Public: As Unregister, but will unregister listener from all message types.
-		#
+		#!
 		# listener - The listener who should no longer get any messages at all,
 		# 			 regardless of type.
 		def self.unregister_all( listener )
@@ -71,6 +85,7 @@ module EventAggregator
 					end
 				end
 			end
+			#TODO: Consider refactoring this, and the above, into a separate, hopefully private, method:
 			@@listeners_all.each do |listener,callback|
 				case [message.async, message.consisten_data]
 				when [true, true]   then EventAggregator::MessageJob.new.async.perform(message,       callback)

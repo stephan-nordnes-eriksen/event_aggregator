@@ -67,9 +67,9 @@ describe EventAggregator::Listener do
 		describe 'legal parameters' do
 			it 'invoke aggregator unregister_all' do
 				listener.class.publicize_methods do
-					expect(EventAggregator::Aggregator).to receive(:unregister_all).with(listener)
+					expect(EventAggregator::Aggregator).to receive(:register_all).with(listener,lambda_method)
 
-					listener.message_type_register_all()
+					listener.message_type_register_all(lambda_method)
 				end
 			end
 		end
@@ -79,9 +79,9 @@ describe EventAggregator::Listener do
 		describe 'legal parameters' do
 			it 'invoke aggregator unregister' do
 				listener.class.publicize_methods do
-					expect(EventAggregator::Aggregator).to receive(:register_to_all).with(listener)
+					expect(EventAggregator::Aggregator).to receive(:unregister_all).with(listener)
 
-					listener.message_type_unregister()
+					listener.message_type_unregister_all()
 				end
 			end
 		end
