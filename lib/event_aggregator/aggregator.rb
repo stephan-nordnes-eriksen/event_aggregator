@@ -95,5 +95,14 @@ module EventAggregator
 				end
 			end
 		end
+
+
+		# Public: Resets the Aggregator to the initial state. This removes all registered listeners. 
+		# Use EventAggregator::Aggregator.reset before each test when doing unit testing.
+		#
+		def self.reset
+			@@listeners = Hash.new{|h, k| h[k] = []}
+			@@listeners_all = Hash.new			
+		end
 	end
 end

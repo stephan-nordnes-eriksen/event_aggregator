@@ -224,27 +224,27 @@ describe EventAggregator::Aggregator do
 				message5 = EventAggregator::Message.new(message_type + "5", data)
 				message6 = EventAggregator::Message.new(message_type + "6", data)
 
-				expect(callback).to receive(:call) {|arg| 
+				expect(callback).to receive(:call) {|arg|
 					expect(arg.message_type).to eql(message1.message_type)
 					expect(arg.data).to eql(message1.data)
 				}
-				expect(callback).to receive(:call) {|arg| 
+				expect(callback).to receive(:call) {|arg|
 					expect(arg.message_type).to eql(message2.message_type)
 					expect(arg.data).to eql(message2.data)
 				}
-				expect(callback).to receive(:call) {|arg| 
+				expect(callback).to receive(:call) {|arg|
 					expect(arg.message_type).to eql(message3.message_type)
 					expect(arg.data).to eql(message3.data)
 				}
-				expect(callback).to receive(:call) {|arg| 
+				expect(callback).to receive(:call) {|arg|
 					expect(arg.message_type).to eql(message4.message_type)
 					expect(arg.data).to eql(message4.data)
 				}
-				expect(callback).to receive(:call) {|arg| 
+				expect(callback).to receive(:call) {|arg|
 					expect(arg.message_type).to eql(message5.message_type)
 					expect(arg.data).to eql(message5.data)
 				}
-				expect(callback).to receive(:call) {|arg| 
+				expect(callback).to receive(:call) {|arg|
 					expect(arg.message_type).to eql(message6.message_type)
 					expect(arg.data).to eql(message6.data)
 				}
@@ -336,5 +336,33 @@ describe EventAggregator::Aggregator do
 				expect{EventAggregator::Aggregator.register_all(2.0, callback)}                                  .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
 			end
 		end
+	end
+
+	describe "self.reset" do
+		it 'removes all listenes' do
+			EventAggregator::Aggregator.register(listener, message_type, callback)
+			EventAggregator::Aggregator.register_all(listener, callback)
+			
+			EventAggregator::Aggregator.reset
+
+			expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type]).to_not include([listener, callback])
+			expect(EventAggregator::Aggregator.class_variable_get(:@@listeners_all))          .to_not include(listener)
+		end
+
+		it 'listener not recieve messages' do
+			listener2 = listener_class.new
+			callback2 = lambda{|data|}
+			message = EventAggregator::Message.new(message_type, data)
+			EventAggregator::Aggregator.register(listener, message_type, callback)
+			EventAggregator::Aggregator.register_all(listener2, callback2)
+			
+			EventAggregator::Aggregator.reset
+
+			expect(callback).to_not receive(:call)
+			expect(callback2).to_not receive(:call)
+
+			EventAggregator::Aggregator.message_publish(message)
+		end
+
 	end
 end
