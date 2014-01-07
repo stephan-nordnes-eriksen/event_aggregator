@@ -14,7 +14,7 @@ module EventAggregator
 
 		@@listeners = Hash.new{|h, k| h[k] = []}
 		@@listeners_all = Hash.new
-
+		@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
 		# Public: Register an EventAggregator::Listener to receive
 		# 		  a specified message type
 		#
@@ -83,6 +83,9 @@ module EventAggregator
 			@@listeners_all.each do |listener,callback|
 				perform_message_job(message, callback, message.async, message.consisten_data)
 			end
+			@@message_translation[message.message_type].each do |message_type_new, callback|
+				EventAggregator::Message.new(message_type_new, callback.call(message.data)).publish
+			end
 		end
 
 
@@ -92,16 +95,24 @@ module EventAggregator
 		def self.reset
 			@@listeners = Hash.new{|h, k| h[k] = []}
 			@@listeners_all = Hash.new
+			@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
+		end
+
+
+		def self.translate_message_with(message_type, message_type_new, callback=lambda{|data| data})
+			raise "Illegal parameters" if message_type == nil || message_type_new == nil || !callback.respond_to?(:call) || callback.parameters.count != 1
+			raise "Illegal parameters, equal message_type and message_type_new" if message_type == message_type_new || message_type.eql?(message_type_new)
+
+			@@message_translation[message_type][message_type_new] = callback unless @@message_translation[message_type][message_type_new] == callback
 		end
 
 		private
 		def self.perform_message_job(data, callback, async, consisten_data)
-
 			case [async, consisten_data]
 			when [true, true]   then EventAggregator::MessageJob.new.async.perform(data,       callback)
 			when [true, false]  then EventAggregator::MessageJob.new.async.perform(data.clone, callback)
-			when [false, true]  then EventAggregator::MessageJob.new.perform(      data,       callback)
-			when [false, false] then EventAggregator::MessageJob.new.perform(      data.clone, callback)
+			when [false, true]  then EventAggregator::MessageJob.new      .perform(data,       callback)
+			when [false, false] then EventAggregator::MessageJob.new      .perform(data.clone, callback)
 			end
 		end
 	end
