@@ -33,11 +33,12 @@ describe EventAggregator::Aggregator do
 			it 'not allow nil as message type' do
 				expect{EventAggregator::Aggregator.register(nil, message_type, callback)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
 			end
-			it 'not allow non-listener to register' do
-				expect{EventAggregator::Aggregator.register(EventAggregator::Message.new("a","b"), message_type, callback)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
-				expect{EventAggregator::Aggregator.register(random_string, message_type, callback)}                        .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
-				expect{EventAggregator::Aggregator.register(random_number, message_type, callback)}                        .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
-				expect{EventAggregator::Aggregator.register(2.0, message_type, callback)}                                  .to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+			it "listener raise error" do
+				expect{EventAggregator::Aggregator.register(nil                                  , message_type, callback)}.to raise_error
+				expect{EventAggregator::Aggregator.register(EventAggregator::Message.new("a","b"), message_type, callback)}.to raise_error
+				expect{EventAggregator::Aggregator.register(random_string                        , message_type, callback)}.to raise_error
+				expect{EventAggregator::Aggregator.register(random_number                        , message_type, callback)}.to raise_error
+				expect{EventAggregator::Aggregator.register(2.0                                  , message_type, callback)}.to raise_error
 			end
 			it 'callback raise error' do
 				expect{EventAggregator::Aggregator.register(listener, message_type, nil                                  )}.to raise_error
@@ -506,7 +507,7 @@ describe EventAggregator::Aggregator do
 			end
 		end
 		describe 'illegal parameters' do
-			#TODO: Double check that we are testing illegal callbacks everywhere.
+			
 			it 'callback raise error' do
 				expect{EventAggregator::Aggregator.register_producer(message_type, nil                                  )}.to raise_error
 				expect{EventAggregator::Aggregator.register_producer(message_type, EventAggregator::Message.new("a","b"))}.to raise_error
