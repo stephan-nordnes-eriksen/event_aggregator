@@ -342,11 +342,13 @@ describe EventAggregator::Aggregator do
 		it 'removes all listenes' do
 			EventAggregator::Aggregator.register(listener, message_type, callback)
 			EventAggregator::Aggregator.register_all(listener, callback)
+			EventAggregator::Aggregator.translate_message_with(message_type, message_type + " different")
 
 			EventAggregator::Aggregator.reset
 
-			expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type]).to_not include([listener, callback])
-			expect(EventAggregator::Aggregator.class_variable_get(:@@listeners_all))          .to_not include(listener)
+			expect(EventAggregator::Aggregator.class_variable_get(:@@listeners))          .to be_empty
+			expect(EventAggregator::Aggregator.class_variable_get(:@@listeners_all))      .to be_empty
+			expect(EventAggregator::Aggregator.class_variable_get(:@@message_translation)).to be_empty
 		end
 
 		it 'listener not recieve messages' do
