@@ -30,7 +30,7 @@ module EventAggregator
 			@@listeners[message_type] << [listener, callback] unless ! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)
 		end
 
-		
+
 		# Public: Register an EventAggregator::Listener to receive
 		# 		  every single message that is published.
 		#
@@ -77,32 +77,32 @@ module EventAggregator
 			raise "Invalid message" unless message.respond_to?(:message_type) && message.respond_to?(:data)
 			@@listeners[message.message_type].each do |l|
 				if l[1].respond_to? :call
-					case [message.async, message.consisten_data]
-					when [true, true]   then EventAggregator::MessageJob.new.async.perform(message.data,       l[1])
-					when [true, false]  then EventAggregator::MessageJob.new.async.perform(message.data.clone, l[1])
-					when [false, true]  then EventAggregator::MessageJob.new.perform(      message.data,       l[1])
-					when [false, false] then EventAggregator::MessageJob.new.perform(      message.data.clone, l[1])
-					end
+					perform_message_job(message.data, l[1], message.async, message.consisten_data)
 				end
 			end
-			#TODO: Consider refactoring this, and the above, into a separate, hopefully private, method:
 			@@listeners_all.each do |listener,callback|
-				case [message.async, message.consisten_data]
-				when [true, true]   then EventAggregator::MessageJob.new.async.perform(message,       callback)
-				when [true, false]  then EventAggregator::MessageJob.new.async.perform(message.clone, callback)
-				when [false, true]  then EventAggregator::MessageJob.new.perform(      message,       callback)
-				when [false, false] then EventAggregator::MessageJob.new.perform(      message.clone, callback)
-				end
+				perform_message_job(message, callback, message.async, message.consisten_data)
 			end
 		end
 
 
-		# Public: Resets the Aggregator to the initial state. This removes all registered listeners. 
+		# Public: Resets the Aggregator to the initial state. This removes all registered listeners.
 		# Use EventAggregator::Aggregator.reset before each test when doing unit testing.
 		#
 		def self.reset
 			@@listeners = Hash.new{|h, k| h[k] = []}
-			@@listeners_all = Hash.new			
+			@@listeners_all = Hash.new
+		end
+
+		private
+		def self.perform_message_job(data, callback, async, consisten_data)
+
+			case [async, consisten_data]
+			when [true, true]   then EventAggregator::MessageJob.new.async.perform(data,       callback)
+			when [true, false]  then EventAggregator::MessageJob.new.async.perform(data.clone, callback)
+			when [false, true]  then EventAggregator::MessageJob.new.perform(      data,       callback)
+			when [false, false] then EventAggregator::MessageJob.new.perform(      data.clone, callback)
+			end
 		end
 	end
 end
