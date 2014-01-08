@@ -8,34 +8,34 @@ require 'spec_helper'
 # #... execute private methods
 # end
 class Class
-  def publicize_methods
-    saved_private_instance_methods = self.private_instance_methods
-    self.class_eval { public *saved_private_instance_methods }
-    yield
-    self.class_eval { private *saved_private_instance_methods }
-  end
+	def publicize_methods
+		saved_private_instance_methods = self.private_instance_methods
+		self.class_eval { public *saved_private_instance_methods }
+		yield
+		self.class_eval { private *saved_private_instance_methods }
+	end
 end
 
 describe EventAggregator::Listener do
 	let(:listener)           { (Class.new { include EventAggregator::Listener }).new }
 	let(:listener_class)     { Class.new { include EventAggregator::Listener } }
 	let(:message_type)       { Faker::Name.name }
-	let(:lambda_method)      { lambda { |data| } }
+	let(:callback)      { lambda { |data| } }
 	let(:data)  		     { Faker::Name.name }
 	let(:recieve_all_method) { lambda { |message| } }
 
 	before(:each) do
-		EventAggregator::Aggregator.class_variable_set :@@listener, Hash.new{|h, k| h[k] = []}
+		EventAggregator::Aggregator.reset
 		@message = EventAggregator::Message.new(message_type, data)
 	end
 
 	describe '.message_type_register' do
 		describe 'legal parameters' do
 			it 'invoke aggregator register' do
-				expect(EventAggregator::Aggregator).to receive(:register).with(listener, message_type, lambda_method)
-				
+				expect(EventAggregator::Aggregator).to receive(:register).with(listener, message_type, callback)
+
 				listener.class.publicize_methods do
-					listener.message_type_register(message_type, lambda_method)
+					listener.message_type_register(message_type, callback)
 				end
 			end
 		end
@@ -53,8 +53,8 @@ describe EventAggregator::Listener do
 		describe 'legal parameters' do
 			it 'invoke aggregator unregister' do
 				listener.class.publicize_methods do
-					listener.message_type_register(message_type, lambda_method)
-					
+					listener.message_type_register(message_type, callback)
+
 					expect(EventAggregator::Aggregator).to receive(:unregister).with(listener, message_type)
 
 					listener.message_type_unregister(message_type)
@@ -67,9 +67,9 @@ describe EventAggregator::Listener do
 		describe 'legal parameters' do
 			it 'invoke aggregator unregister_all' do
 				listener.class.publicize_methods do
-					expect(EventAggregator::Aggregator).to receive(:register_all).with(listener,lambda_method)
+					expect(EventAggregator::Aggregator).to receive(:register_all).with(listener,callback)
 
-					listener.message_type_register_all(lambda_method)
+					listener.message_type_register_all(callback)
 				end
 			end
 		end
@@ -82,6 +82,17 @@ describe EventAggregator::Listener do
 					expect(EventAggregator::Aggregator).to receive(:unregister_all).with(listener)
 
 					listener.message_type_unregister_all()
+				end
+			end
+		end
+	end
+
+	describe ".message_type_producer_register" do
+		describe 'legal parameters' do
+			it "invoke aggregator register_producer" do
+				expect(EventAggregator::Aggregator).to receive(:register_producer).with(message_type, callback)
+				listener.class.publicize_methods do
+					listener.producer_register(message_type, callback)
 				end
 			end
 		end

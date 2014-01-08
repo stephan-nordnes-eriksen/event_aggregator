@@ -12,9 +12,10 @@ module EventAggregator
 	class Aggregator
 		class <<self; private :new; end
 
-		@@listeners = Hash.new{|h, k| h[k] = []}
+		@@listeners = Hash.new{|h, k| h[k] = Hash.new }
 		@@listeners_all = Hash.new
 		@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
+		@@producers = Hash.new
 		# Public: Register an EventAggregator::Listener to receive
 		# 		  a specified message type
 		#
@@ -26,8 +27,11 @@ module EventAggregator
 		# 				message_type is published. Is executed with message.data as parameter.
 		#
 		def self.register( listener, message_type, callback )
+			raise "Illegal listener" unless listener.class < EventAggregator::Listener
+			raise "Illegal message_type" if message_type == nil
 			raise "Illegal callback" unless callback.respond_to?(:call)
-			@@listeners[message_type] << [listener, callback] unless ! (listener.class < EventAggregator::Listener) || @@listeners[message_type].include?(listener)
+
+			@@listeners[message_type][listener] = callback
 		end
 
 
@@ -39,10 +43,10 @@ module EventAggregator
 		# callback - The callback that will be executed every time a message is published.
 		# 				will execute with the message as parameter.
 		#
-		# Returns the duplicated String.
 		def self.register_all( listener, callback )
+			raise "Illegal listener" unless listener.class < EventAggregator::Listener
 			raise "Illegal callback" unless callback.respond_to?(:call)
-			@@listeners_all[listener] = callback unless ! (listener.class < EventAggregator::Listener) || @@listeners_all.include?(listener)
+			@@listeners_all[listener] = callback
 		end
 
 		# Public: Unegister an EventAggregator::Listener to a
@@ -53,7 +57,7 @@ module EventAggregator
 		# 			 the messages.
 		# message_type - The message type to unregister for.
 		def self.unregister( listener, message_type )
-			@@listeners[message_type].delete_if{|value| value[0] == listener}
+			@@listeners[message_type].delete(listener)
 		end
 
 		# Public: As Unregister, but will unregister listener from all message types.
@@ -61,8 +65,8 @@ module EventAggregator
 		# listener - The listener who should no longer get any messages at all,
 		# 			 regardless of type.
 		def self.unregister_all( listener )
-			@@listeners.each do |e|
-				e[1].delete_if{|value| value[0] == listener}
+			@@listeners.each do |key,value|
+				value.delete(listener)
 			end
 			@@listeners_all.delete(listener)
 		end
@@ -75,10 +79,8 @@ module EventAggregator
 		# consisten_data - true => the same object will be sent to all recievers. Default false
 		def self.message_publish ( message )
 			raise "Invalid message" unless message.respond_to?(:message_type) && message.respond_to?(:data)
-			@@listeners[message.message_type].each do |l|
-				if l[1].respond_to? :call
-					perform_message_job(message.data, l[1], message.async, message.consisten_data)
-				end
+			@@listeners[message.message_type].each do |listener, callback|	
+				perform_message_job(message.data, callback, message.async, message.consisten_data)
 			end
 			@@listeners_all.each do |listener,callback|
 				perform_message_job(message, callback, message.async, message.consisten_data)
@@ -93,17 +95,62 @@ module EventAggregator
 		# Use EventAggregator::Aggregator.reset before each test when doing unit testing.
 		#
 		def self.reset
-			@@listeners = Hash.new{|h, k| h[k] = []}
+			@@listeners = Hash.new{|h, k| h[k] = Hash.new}
 			@@listeners_all = Hash.new
 			@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
+			@@producers = Hash.new
 		end
 
-
+		# Public: Will produce another message when a message type is published.
+		#
+		# message_type - Type of the message that will trigger a new message to be published.
+		# message_type_new -The type of the new message that will be published
+		# callback=lambda{|data| data} - The callback that will transform the data from message_type to message_type_new. Default: copy.
+		#
 		def self.translate_message_with(message_type, message_type_new, callback=lambda{|data| data})
 			raise "Illegal parameters" if message_type == nil || message_type_new == nil || !callback.respond_to?(:call) || callback.parameters.count != 1
 			raise "Illegal parameters, equal message_type and message_type_new" if message_type == message_type_new || message_type.eql?(message_type_new)
 
 			@@message_translation[message_type][message_type_new] = callback unless @@message_translation[message_type][message_type_new] == callback
+		end
+
+		
+		# Public: Registering a producer with the Aggregator. A producer will respond to message requests, a 
+		# 			request for a certain piece of data. 
+		#
+		# message_type -The message type that this callback will respond to.
+		# callback - The callback that returns data to the requester. Must have one parameter.
+		#
+		#Example:
+		#
+		# 	EventAggregator::Aggregator.register_producer("GetMultipliedByTwo", lambda{|data| data*2})
+		#
+		def self.register_producer(message_type, callback)
+			raise "Illegal message_type" if message_type == nil
+			raise "Illegal callback" unless callback.respond_to?(:call) && callback.parameters.count == 1
+			raise "Already defined producer" if @@producers[message_type]
+			
+			@@producers[message_type] = callback
+		end
+		
+		
+		# Public: Will remove a producer.
+		#
+		# message_type -The message type which will no longer respond to message requests.
+		#
+		def self.unregister_producer(message_type)
+			@@producers.delete(message_type)
+		end
+
+		
+		# Public: Request a piece of information.
+		#
+		# message -The message that will be requested based on its message type and data.
+		#
+		# Returns The data provided by a producer registered for this specific message type, or nil.
+		#
+		def self.message_request(message)
+			@@producers[message.message_type] ? @@producers[message.message_type].call(message.data) : nil
 		end
 
 		private

@@ -35,7 +35,7 @@ module EventAggregator
 		# Public: Used to register listener for all message types. Every time a message is published
 		# the provided callback will be executed with the message as the content.
 		#
-		# callback -The method that will be invoked every time this message type is received. Must have: callback.respond_to? :call #=> true
+		# callback - The method that will be invoked every time this message type is received. Must have: callback.respond_to? :call #=> true
 		#
 		def message_type_register_all(callback)
 			Aggregator.register_all(self, callback)
@@ -44,7 +44,7 @@ module EventAggregator
 		# Public: Used to remove a certain type of message from your listening types. Messages of this specific type will no longer
 		# invoke any callbacks.
 		#
-		# message_type -A string indicating the message type you no longer want to receive.
+		# message_type - A string indicating the message type you no longer want to receive.
 		#
 		# Examples
 		#
@@ -60,6 +60,22 @@ module EventAggregator
 		#
 		def message_type_unregister_all
 			Aggregator.unregister_all(self)
+		end
+
+
+		
+		# Public: Duplicate some text an arbitrary number of times.
+		#
+		# message_type - A string indicating the the message type the callback will respond to
+		# callback - The callback returning data whenever a message requests the message_type.
+		#
+		# Excample: 
+		# 			listener.producer_register("MultiplyByTwo", lambda{|data| return data*2})
+		# 			number = EventAggregator::Message.new("MultiplyByTwo", 3)
+		# 			# => 6
+		#
+		def producer_register(message_type, callback)
+			Aggregator.register_producer(message_type, callback)
 		end
 	end
 end
