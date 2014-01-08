@@ -104,7 +104,7 @@ module EventAggregator
 		# Public: Will produce another message when a message type is published.
 		#
 		# message_type - Type of the message that will trigger a new message to be published.
-		# message_type_new -The type of the new message that will be published
+		# message_type_new - The type of the new message that will be published
 		# callback=lambda{|data| data} - The callback that will transform the data from message_type to message_type_new. Default: copy.
 		#
 		def self.translate_message_with(message_type, message_type_new, callback=lambda{|data| data})
@@ -118,10 +118,10 @@ module EventAggregator
 		# Public: Registering a producer with the Aggregator. A producer will respond to message requests, a 
 		# 			request for a certain piece of data. 
 		#
-		# message_type -The message type that this callback will respond to.
+		# message_type - The message type that this callback will respond to.
 		# callback - The callback that returns data to the requester. Must have one parameter.
 		#
-		#Example:
+		# Example:
 		#
 		# 	EventAggregator::Aggregator.register_producer("GetMultipliedByTwo", lambda{|data| data*2})
 		#
@@ -136,7 +136,7 @@ module EventAggregator
 		
 		# Public: Will remove a producer.
 		#
-		# message_type -The message type which will no longer respond to message requests.
+		# message_type - The message type which will no longer respond to message requests.
 		#
 		def self.unregister_producer(message_type)
 			@@producers.delete(message_type)
@@ -145,7 +145,7 @@ module EventAggregator
 		
 		# Public: Request a piece of information.
 		#
-		# message -The message that will be requested based on its message type and data.
+		# message - The message that will be requested based on its message type and data.
 		#
 		# Returns The data provided by a producer registered for this specific message type, or nil.
 		#
