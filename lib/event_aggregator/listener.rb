@@ -66,8 +66,8 @@ module EventAggregator
 		
 		# Public: Duplicate some text an arbitrary number of times.
 		#
-		# message_type -A string indicating the the message type the callback will respond to
-		# callback -The callback returning data whenever a message requests the message_type.
+		# message_type - A string indicating the the message type the callback will respond to
+		# callback - The callback returning data whenever a message requests the message_type.
 		#
 		# Excample: 
 		# 			listener.producer_register("MultiplyByTwo", lambda{|data| return data*2})

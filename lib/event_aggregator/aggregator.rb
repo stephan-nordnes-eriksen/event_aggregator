@@ -43,7 +43,6 @@ module EventAggregator
 		# callback - The callback that will be executed every time a message is published.
 		# 				will execute with the message as parameter.
 		#
-		# Returns the duplicated String.
 		def self.register_all( listener, callback )
 			raise "Illegal listener" unless listener.class < EventAggregator::Listener
 			raise "Illegal callback" unless callback.respond_to?(:call)

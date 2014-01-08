@@ -534,7 +534,6 @@ describe EventAggregator::Aggregator do
 	describe "self.message_request" do
 		describe 'legal parameters' do
 			it 'run correct callback' do
-				#TODO: Add to the listener class as well, for easier signup
 				EventAggregator::Aggregator.register_producer(message_type, callback)
 				message = EventAggregator::Message.new(message_type, data)
 

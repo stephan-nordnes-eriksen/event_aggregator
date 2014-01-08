@@ -51,7 +51,6 @@ describe EventAggregator::Message do
 		end
 	end
 
-	#TODO: should requests be catched by the recieve_all?
 	describe ".request" do
 		it 'invoke message_request on aggregator' do
 			message = EventAggregator::Message.new(message_type, data)
