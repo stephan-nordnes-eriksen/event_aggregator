@@ -8,30 +8,32 @@ describe EventAggregator::Aggregator do
 	let(:callback)       { lambda{ |data| } }
 	let(:random_string)  { Faker::Internet.password }
 	let(:random_number)  { Faker::Number.number(rand(9)) }
+	
 	before(:each) do
 		EventAggregator::Aggregator.reset
 	end
 	describe "self.register" do
 		describe 'legal parameters' do
-			it 'registered at correct place' do
-				EventAggregator::Aggregator.register(listener, message_type, callback)
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type]).to include([listener, callback])
+			it "no errors" do
+				expect{EventAggregator::Aggregator.register(listener, message_type, callback)}.to_not raise_error
 			end
-
-			it 'not be registered in wrong place' do
+			it "is stored" do
+				expect{EventAggregator::Aggregator.register(listener, message_type, callback)}.to change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+			end
+			it "overwrite previous callback" do
+				callback2 = lambda { |data| }
 				EventAggregator::Aggregator.register(listener, message_type, callback)
-				EventAggregator::Aggregator.class_variable_get(:@@listeners).each do |e|
-					if e[0] == message_type
-						expect(e[1]).to include([listener, callback])
-					else
-						expect(e[1]).to_not include([listener, callback])
-					end
-				end
+				EventAggregator::Aggregator.register(listener, message_type, callback2)
+				
+				expect(callback).to_not receive(:call)
+				expect(callback2).to receive(:call)
+
+				EventAggregator::Aggregator.message_publish(EventAggregator::Message.new(message_type, data))
 			end
 		end
 		describe 'illegal parameters' do
-			it 'not allow nil as message type' do
-				expect{EventAggregator::Aggregator.register(nil, message_type, callback)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+			it 'message_type raise error' do
+				expect{EventAggregator::Aggregator.register(listener, nil, callback)}.to raise_error
 			end
 			it "listener raise error" do
 				expect{EventAggregator::Aggregator.register(nil                                  , message_type, callback)}.to raise_error
@@ -69,7 +71,9 @@ describe EventAggregator::Aggregator do
 
 				EventAggregator::Aggregator.unregister(listener, message_type)
 
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type2]).to include([listener, callback])
+				expect(callback).to receive(:call).once
+
+				EventAggregator::Aggregator.message_publish(EventAggregator::Message.new(message_type2,data))
 			end
 		end
 		describe 'unregitering nonregisterd listener' do
@@ -91,10 +95,12 @@ describe EventAggregator::Aggregator do
 				expect{EventAggregator::Aggregator.unregister(listener1, message_type)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
 				expect{EventAggregator::Aggregator.unregister(listener2, message_type)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
 				expect{EventAggregator::Aggregator.unregister(listener3, message_type)}.to_not change{EventAggregator::Aggregator.class_variable_get(:@@listeners)}
+				
+				expect(callback).to receive(:call).exactly(3).times
 
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type1]).to include([listener1, callback])
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type2]).to include([listener2, callback])
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type3]).to include([listener3, callback])
+				EventAggregator::Aggregator.message_publish(EventAggregator::Message.new(message_type1,data))
+				EventAggregator::Aggregator.message_publish(EventAggregator::Message.new(message_type2,data))
+				EventAggregator::Aggregator.message_publish(EventAggregator::Message.new(message_type3,data))
 			end
 		end
 		describe 'unregitering listener from wrong message type' do
@@ -144,9 +150,9 @@ describe EventAggregator::Aggregator do
 
 				EventAggregator::Aggregator.unregister_all(listener)
 
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type]).to include([listener2, callback])
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type2]).to include([listener3, callback])
-				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type3]).to include([listener4, callback])
+				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type][listener2]).to eq(callback)
+				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type2][listener3]).to eq(callback)
+				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners)[message_type3][listener4]).to eq(callback)
 			end
 		end
 		describe "unregistering listener registered for several message types" do
@@ -500,14 +506,7 @@ describe EventAggregator::Aggregator do
 	end
 
 	describe "self.register_producer" do
-		describe 'legal parameters' do
-			it 'registered at correct place' do
-				EventAggregator::Aggregator.register_producer(message_type, callback)
-				expect(EventAggregator::Aggregator.class_variable_get(:@@producers)[message_type]).to equal(callback)
-			end
-		end
 		describe 'illegal parameters' do
-			
 			it 'callback raise error' do
 				expect{EventAggregator::Aggregator.register_producer(message_type, nil                                  )}.to raise_error
 				expect{EventAggregator::Aggregator.register_producer(message_type, EventAggregator::Message.new("a","b"))}.to raise_error
