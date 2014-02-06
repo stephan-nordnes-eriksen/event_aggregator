@@ -156,10 +156,10 @@ module EventAggregator
 		private
 		def self.perform_message_job(data, callback, async, consisten_data)
 			case [async, consisten_data]
-			when [true, true]   then EventAggregator::MessageJob.new.async.perform(data,       callback)
-			when [true, false]  then EventAggregator::MessageJob.new.async.perform(data.clone, callback)
-			when [false, true]  then EventAggregator::MessageJob.new      .perform(data,       callback)
-			when [false, false] then EventAggregator::MessageJob.new      .perform(data.clone, callback)
+			when [true, true]   then EventMachine.run{EventAggregator::MessageJob.new.perform(data,       callback) ; EventMachine.stop }
+			when [true, false]  then EventMachine.run{EventAggregator::MessageJob.new.perform(data.clone, callback) ; EventMachine.stop }
+			when [false, true]  then EventAggregator::MessageJob.new.perform(data,       callback)
+			when [false, false] then EventAggregator::MessageJob.new.perform(data.clone, callback)
 			end
 		end
 	end
