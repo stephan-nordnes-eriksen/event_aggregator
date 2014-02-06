@@ -4,7 +4,6 @@ require 'rspec'
 #require 'rack/test'
 require "faker"
 require "event_aggregator"
-require "sucker_punch/testing/inline"
 require 'coveralls'
 Coveralls.wear!
 

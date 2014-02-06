@@ -4,7 +4,6 @@ module EventAggregator
 	# for processing message distribution.
 	#
 	class MessageJob
-		include SuckerPunch::Job
 		
 		# Public: Duplicate some text an arbitrary number of times.
 		#
