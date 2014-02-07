@@ -74,24 +74,16 @@ Or install it yourself as:
 	#=> data
 
 ### IMPORTANT: Asynchronous by Default
-Message.publish is asynchronous by default. This means that if you run event_aggregator in a script that terminates, there is a chance that the script will terminate before the workers have processed the messages and you can receive an error looking like the following: 
-	
-	W, [2013-12-29T11:17:29.659902 #48097]  WARN -- : Terminating task: type=:call, meta={:method_name=>:perform}, status=:callwait
-	D, [2013-12-29T11:17:29.660142 #48097] DEBUG -- : Celluloid::PoolManager: async call `perform` aborted!
-	Celluloid::Task::TerminatedError: task was terminated
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:32:in `terminate'
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:404:in `block in cleanup'
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:404:in `each'
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:404:in `cleanup'
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:375:in `shutdown'
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:185:in `run'
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/actor.rb:157:in `block in initialize'
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/thread_handle.rb:13:in `block in initialize'
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/internal_pool.rb:100:in `call'
-		/Users/user/.rvm/gems/ruby-1.9.3-p429/gems/celluloid-0.15.2/lib/celluloid/internal_pool.rb:100:in `block in create'
-	W, [2013-12-29T11:17:29.660271 #48097]  WARN -- : Terminating task: type=:finalizer, meta={:method_name=>:__shutdown__}, status=:callwait
+Message.publish is asynchronous by default. This means that if you run event_aggregator in a script that terminates, there is a chance that the script will terminate before the workers have processed the messages. This might cause errors.
 
-To make it synchronous (not recommended) use the following:
+A simple way to get around this problem is to do the following:
+
+	#....setup...
+	EventAggregator::Message.new("foo2", "data").publish
+
+	gets #This will wait for user input.
+
+To make the message processing synchronous (not recommended) use the following:
 
 	EventAggregator::Message.new("foo", "data", false).publish
 	#=> data
@@ -129,6 +121,33 @@ This enables the following:
 	#=> "foo bar bar bar bar"
 
 
+## Producers
+In version 1.1+ the concept of producers are added. They are blocks or methods that responds to requests. A producer must be registered, which is done like this:
+
+	#listener is an instance of a class that includes EventAggregator::Listener, similar to the Foo class above.
+	listener.producer_register("MultiplyByTwo", lambda{|data| return data*2})
+
+Then, somewhere in your code, you can do the following:
+
+	number = EventAggregator::Message.new("MultiplyByTwo", 3).request
+	puts number
+	# => 6
+
+The producers are a good way to abstract away the retrieval of certain information.
+
+Note: Message reqests are always blocking.
+
+## Message translation
+In version 1.1+ the concept of message translation is added. This allows you to have messages on a specific type spawn other messages. To translate message type "type_1" into "type_2" you do:
+	
+	#Anywhere in your code
+	EventAggregator::Aggregator.translate_message_with("type_1", "type_2")
+
+It is also possible to transform the data in the conversion. To double the data value between "type_1" and "type_2" you do:
+
+	EventAggregator::Aggregator.translate_message_with("type_1", "type_2", lambda{|data| data*2})
+
+This is often very usefull when you have one module that has a specific task, and it should be truly independent of other objects, even the message type they produce. The message translation allows you to have one file where you list all translations to give you a good overview and high maintainability.
 
 ## Usage Considerations
 All messages are processed asynchronous by default. This means that there might be raise conditions in your code. 
