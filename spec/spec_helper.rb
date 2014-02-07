@@ -4,9 +4,19 @@ require 'rspec'
 #require 'rack/test'
 require "faker"
 require "event_aggregator"
+#require "sucker_punch/testing/inline"
 require 'coveralls'
 Coveralls.wear!
 
+
+
+class Thread::Pool
+	
+	# Public: Overriding the process-call of the thread::pool so we can do tests better
+	def process (*args, &block)
+		block.call(*args)
+	end
+end
 
 RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true

@@ -25,5 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'faker', '~> 1.2'
   spec.add_development_dependency 'coveralls', '~> 0.7'
   
-  spec.add_dependency 'eventmachine'
+  spec.add_dependency 'thread'
 end

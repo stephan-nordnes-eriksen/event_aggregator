@@ -11,7 +11,7 @@ module EventAggregator
 	# 	end
 	class Aggregator
 		class <<self; private :new; end
-
+		@@pool = Thread.pool(4)
 		@@listeners = Hash.new{|h, k| h[k] = Hash.new }
 		@@listeners_all = Hash.new
 		@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
@@ -156,8 +156,8 @@ module EventAggregator
 		private
 		def self.perform_message_job(data, callback, async, consisten_data)
 			case [async, consisten_data]
-			when [true, true]   then EventMachine.run{EventAggregator::MessageJob.new.perform(data,       callback) ; EventMachine.stop }
-			when [true, false]  then EventMachine.run{EventAggregator::MessageJob.new.perform(data.clone, callback) ; EventMachine.stop }
+			when [true, true]   then @@pool.process{ EventAggregator::MessageJob.new.perform(data,       callback) }
+			when [true, false]  then @@pool.process{ EventAggregator::MessageJob.new.perform(data.clone, callback) }
 			when [false, true]  then EventAggregator::MessageJob.new.perform(data,       callback)
 			when [false, false] then EventAggregator::MessageJob.new.perform(data.clone, callback)
 			end

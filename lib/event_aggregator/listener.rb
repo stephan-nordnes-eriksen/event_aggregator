@@ -71,7 +71,7 @@ module EventAggregator
 		#
 		# Excample: 
 		# 			listener.producer_register("MultiplyByTwo", lambda{|data| return data*2})
-		# 			number = EventAggregator::Message.new("MultiplyByTwo", 3)
+		# 			number = EventAggregator::Message.new("MultiplyByTwo", 3).request
 		# 			# => 6
 		#
 		def producer_register(message_type, callback)
