@@ -108,7 +108,7 @@ module EventAggregator
 		# callback=lambda{|data| data} - The callback that will transform the data from message_type to message_type_new. Default: copy.
 		#
 		def self.translate_message_with(message_type, message_type_new, callback=lambda{|data| data})
-			raise "Illegal parameters" if message_type == nil || message_type_new == nil || !callback.respond_to?(:call) || callback.parameters.count != 1
+			raise "Illegal parameters" if message_type == nil || message_type_new == nil || !callback.respond_to?(:call) || callback.arity != 1 #TODO: The callback.parameters is not 1.8.7 compatible.
 			raise "Illegal parameters, equal message_type and message_type_new" if message_type == message_type_new || message_type.eql?(message_type_new)
 
 			@@message_translation[message_type][message_type_new] = callback unless @@message_translation[message_type][message_type_new] == callback
@@ -127,7 +127,7 @@ module EventAggregator
 		#
 		def self.register_producer(message_type, callback)
 			raise "Illegal message_type" if message_type == nil
-			raise "Illegal callback" unless callback.respond_to?(:call) && callback.parameters.count == 1
+			raise "Illegal callback" unless callback.respond_to?(:call) && callback.arity == 1
 			raise "Already defined producer" if @@producers[message_type]
 			
 			@@producers[message_type] = callback
