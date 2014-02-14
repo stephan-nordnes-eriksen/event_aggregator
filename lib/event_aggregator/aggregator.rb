@@ -128,7 +128,7 @@ module EventAggregator
 		def self.register_producer(message_type, callback)
 			raise "Illegal message_type" if message_type == nil
 			raise "Illegal callback" unless callback.respond_to?(:call) && callback.arity == 1
-			raise "Already defined producer" if @@producers[message_type]
+			
 			
 			@@producers[message_type] = callback
 		end
