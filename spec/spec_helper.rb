@@ -10,13 +10,13 @@ Coveralls.wear!
 
 
 
-class Thread::Pool
+# class Thread::Pool
 	
-	# Public: Overriding the process-call of the thread::pool so we can do tests better
-	def process (*args, &block)
-		block.call(*args)
-	end
-end
+# 	# Public: Overriding the process-call of the thread::pool so we can do tests better
+# 	def process (*args, &block)
+# 		block.call(*args)
+# 	end
+# end
 
 RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true
@@ -28,4 +28,14 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = "random"
+end
+
+
+class EventAggregator::Aggregator
+
+  def self.restart_pool
+    @@pool.shutdown
+    @@pool = Thread.pool(4)
+  end
+
 end

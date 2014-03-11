@@ -155,7 +155,7 @@ module EventAggregator
 
 		private
 		def self.perform_message_job(data, callback, async, consisten_data)
-			case [async, consisten_data]
+			case [async, consisten_data || data == nil]
 			when [true, true]   then @@pool.process{ EventAggregator::MessageJob.new.perform(data,       callback) }
 			when [true, false]  then @@pool.process{ EventAggregator::MessageJob.new.perform(data.clone, callback) }
 			when [false, true]  then EventAggregator::MessageJob.new.perform(data,       callback)

@@ -8,9 +8,14 @@ describe EventAggregator::Aggregator do
 	let(:callback)       { lambda{ |data| } }
 	let(:random_string)  { Faker::Internet.password }
 	let(:random_number)  { Faker::Number.number(rand(9)) }
-	
-	before(:each) do
+	let(:empty_object)   { Object.new }
+
+	before(:all) do
 		EventAggregator::Aggregator.reset
+	end
+
+	after(:each) do
+		EventAggregator::Aggregator.restart_pool
 	end
 	describe "self.register" do
 		describe 'legal parameters' do
@@ -229,15 +234,17 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.message_publish(message)
 			end
 
-			it 'run all callbacks for all message types' do
+			it 'runs all callbacks when data is different types' do
 				EventAggregator::Aggregator.register_all(listener, callback)
+				
+				message1 = EventAggregator::Message.new(message_type      , nil)
+				message2 = EventAggregator::Message.new(message_type + "2", random_number)
+				message3 = EventAggregator::Message.new(message_type + "3", random_string)
+				message4 = EventAggregator::Message.new(message_type + "4", empty_object)
+				message5 = EventAggregator::Message.new(message_type + "5", true)
+				message6 = EventAggregator::Message.new(message_type + "6", false)
 
-				message1 = EventAggregator::Message.new(message_type      , data)
-				message2 = EventAggregator::Message.new(message_type + "2", data)
-				message3 = EventAggregator::Message.new(message_type + "3", data)
-				message4 = EventAggregator::Message.new(message_type + "4", data)
-				message5 = EventAggregator::Message.new(message_type + "5", data)
-				message6 = EventAggregator::Message.new(message_type + "6", data)
+
 
 				expect(callback).to receive(:call) {|arg|
 					expect(arg.message_type).to eql(message1.message_type)
@@ -263,6 +270,58 @@ describe EventAggregator::Aggregator do
 					expect(arg.message_type).to eql(message6.message_type)
 					expect(arg.data).to eql(message6.data)
 				}
+
+
+				EventAggregator::Aggregator.message_publish(message1)
+				EventAggregator::Aggregator.message_publish(message2)
+				EventAggregator::Aggregator.message_publish(message3)
+				EventAggregator::Aggregator.message_publish(message4)
+				EventAggregator::Aggregator.message_publish(message5)
+				EventAggregator::Aggregator.message_publish(message6)
+			end
+
+			it 'runs all callbacks when data is different types register one' do
+				EventAggregator::Aggregator.register(listener, message_type, callback)
+				
+				message1 = EventAggregator::Message.new(message_type, nil)
+				message2 = EventAggregator::Message.new(message_type, random_number)
+				message3 = EventAggregator::Message.new(message_type, random_string)
+				message4 = EventAggregator::Message.new(message_type, empty_object)
+				message5 = EventAggregator::Message.new(message_type, true)
+				message6 = EventAggregator::Message.new(message_type, false)
+				
+				expect(callback).to receive(:call).with(nil)
+				expect(callback).to receive(:call).with(random_number)
+				expect(callback).to receive(:call).with(random_string)
+				expect(callback).to receive(:call).with(empty_object)
+				expect(callback).to receive(:call).with(true)
+				expect(callback).to receive(:call).with(false)
+
+				EventAggregator::Aggregator.message_publish(message1)
+				EventAggregator::Aggregator.message_publish(message2)
+				EventAggregator::Aggregator.message_publish(message3)
+				EventAggregator::Aggregator.message_publish(message4)
+				EventAggregator::Aggregator.message_publish(message5)
+				EventAggregator::Aggregator.message_publish(message6)
+			end
+
+			it 'run all callbacks for all message types register all' do #Fails with seed: 34154
+				EventAggregator::Aggregator.register_all(listener, callback)
+
+				message1 = EventAggregator::Message.new(message_type      , data)
+				message2 = EventAggregator::Message.new(message_type + "2", data)
+				message3 = EventAggregator::Message.new(message_type + "3", data)
+				message4 = EventAggregator::Message.new(message_type + "4", data)
+				message5 = EventAggregator::Message.new(message_type + "5", data)
+				message6 = EventAggregator::Message.new(message_type + "6", data)
+
+
+				expect(callback).to receive(:call).with(message1)
+				expect(callback).to receive(:call).with(message2)
+				expect(callback).to receive(:call).with(message3)
+				expect(callback).to receive(:call).with(message4)
+				expect(callback).to receive(:call).with(message5)
+				expect(callback).to receive(:call).with(message6)
 
 
 				EventAggregator::Aggregator.message_publish(message1)
@@ -577,6 +636,72 @@ describe EventAggregator::Aggregator do
 				expect{EventAggregator::Aggregator.message_request()}        .to raise_error
 				expect{EventAggregator::Aggregator.message_request(nil)}     .to raise_error
 			end
+		end
+	end
+
+	describe 'propagates fully' do
+		class TestClassSingle
+			include EventAggregator::Listener
+
+			def initialize
+				message_type_register("message_type", method(:test_method))
+			end
+
+			def test_method(data)
+				self.self_called(data)
+			end
+			def self_called(data)
+			end
+		end
+
+		class TestClassAll
+			include EventAggregator::Listener
+
+			def initialize
+				message_type_register_all(method(:test_method))
+			end
+
+			def test_method(data)
+				self.self_called(data)
+			end
+			def self_called(data)
+			end
+		end
+
+		it "calls method on test class single" do
+			test_class = TestClassSingle.new
+			expect(test_class).to receive(:self_called).with(data)
+			message = EventAggregator::Message.new("message_type", data)
+			EventAggregator::Aggregator.message_publish(message)
+		end
+
+		it "calls method on test class all" do
+			test_class = TestClassAll.new
+			message = EventAggregator::Message.new("message_type", data)
+			expect(test_class).to receive(:self_called){|e| expect(e.message_type).to eq("message_type") and expect(e.data).to eq(data)}
+			EventAggregator::Aggregator.message_publish(message)
+		end
+
+		it "calls method on test class single full-stack" do
+			test_class = TestClassSingle.new
+			expect(test_class).to receive(:self_called).with(data)
+			message = EventAggregator::Message.new("message_type", data)
+			message.publish
+		end
+
+		it "calls method on test class all full-stack" do
+			test_class = TestClassAll.new
+			message = EventAggregator::Message.new("message_type", data)
+			expect(test_class).to receive(:self_called){|e| expect(e.message_type).to eq("message_type") and expect(e.data).to eq(data)}
+			message.publish
+		end
+		it "calls method on mulitple" do
+			test_class = TestClassAll.new
+			test_class2 = TestClassSingle.new
+			message = EventAggregator::Message.new("message_type", data)
+			expect(test_class).to receive(:self_called){|e| expect(e.message_type).to eq("message_type") and expect(e.data).to eq(data)}
+			expect(test_class2).to receive(:self_called){|e| expect(e.message_type).to eq("message_type") and expect(e.data).to eq(data)}
+			message.publish
 		end
 	end
 end
