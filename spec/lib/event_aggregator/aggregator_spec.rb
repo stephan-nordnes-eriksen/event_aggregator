@@ -244,33 +244,12 @@ describe EventAggregator::Aggregator do
 				message5 = EventAggregator::Message.new(message_type + "5", true)
 				message6 = EventAggregator::Message.new(message_type + "6", false)
 
-
-
-				expect(callback).to receive(:call) {|arg|
-					expect(arg.message_type).to eql(message1.message_type)
-					expect(arg.data).to eql(message1.data)
-				}
-				expect(callback).to receive(:call) {|arg|
-					expect(arg.message_type).to eql(message2.message_type)
-					expect(arg.data).to eql(message2.data)
-				}
-				expect(callback).to receive(:call) {|arg|
-					expect(arg.message_type).to eql(message3.message_type)
-					expect(arg.data).to eql(message3.data)
-				}
-				expect(callback).to receive(:call) {|arg|
-					expect(arg.message_type).to eql(message4.message_type)
-					expect(arg.data).to eql(message4.data)
-				}
-				expect(callback).to receive(:call) {|arg|
-					expect(arg.message_type).to eql(message5.message_type)
-					expect(arg.data).to eql(message5.data)
-				}
-				expect(callback).to receive(:call) {|arg|
-					expect(arg.message_type).to eql(message6.message_type)
-					expect(arg.data).to eql(message6.data)
-				}
-
+				expect(callback).to receive(:call).with(message1)
+				expect(callback).to receive(:call).with(message2)
+				expect(callback).to receive(:call).with(message3)
+				expect(callback).to receive(:call).with(message4)
+				expect(callback).to receive(:call).with(message5)
+				expect(callback).to receive(:call).with(message6)
 
 				EventAggregator::Aggregator.message_publish(message1)
 				EventAggregator::Aggregator.message_publish(message2)
