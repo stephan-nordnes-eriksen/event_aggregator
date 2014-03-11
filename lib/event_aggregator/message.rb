@@ -30,9 +30,9 @@ module EventAggregator
 		# data - The data that will be passed to the 
 		# EventAggregator::Listener objects
 		# async = true - Indicates if message should be published async or not
-		# consisten_data = false - Indicates if EventAggregator::Listener objects
+		# consisten_data = true - Indicates if EventAggregator::Listener objects
 		# should recieve a consistent object reference or clones.
-		def initialize(message_type, data, async = true, consisten_data = false)
+		def initialize(message_type, data, async = true, consisten_data = true)
 			raise "Illegal Message Type" if message_type == nil
 			
 			@message_type = message_type
