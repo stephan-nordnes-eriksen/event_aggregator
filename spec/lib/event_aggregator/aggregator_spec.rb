@@ -679,7 +679,7 @@ describe EventAggregator::Aggregator do
 			test_class2 = TestClassSingle.new
 			message = EventAggregator::Message.new("message_type", data)
 			expect(test_class).to receive(:self_called){|e| expect(e.message_type).to eq("message_type") and expect(e.data).to eq(data)}
-			expect(test_class2).to receive(:self_called){|e| expect(e.message_type).to eq("message_type") and expect(e.data).to eq(data)}
+			expect(test_class2).to receive(:self_called).with(data)
 			message.publish
 		end
 	end
