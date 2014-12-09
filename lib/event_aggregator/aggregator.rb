@@ -86,7 +86,8 @@ module EventAggregator
 				perform_message_job(message, callback, message.async, message.consisten_data)
 			end
 			@@message_translation[message.message_type].each do |message_type_new, callback|
-				EventAggregator::Message.new(message_type_new, callback.call(message.data)).publish
+				#TODO: I added message.async and consisten_data here. Add tests for that, and make a new version
+				EventAggregator::Message.new(message_type_new, callback.call(message.data), message.async, message.consisten_data).publish
 			end
 		end
 
@@ -128,7 +129,6 @@ module EventAggregator
 		def self.register_producer(message_type, callback)
 			raise "Illegal message_type" if message_type == nil
 			raise "Illegal callback" unless callback.respond_to?(:call) && callback.arity == 1
-			
 			
 			@@producers[message_type] = callback
 		end
