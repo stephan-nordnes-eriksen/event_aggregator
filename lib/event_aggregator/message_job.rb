@@ -12,7 +12,12 @@ module EventAggregator
 		# callback - The callback that will be processed with the data as 
 		# a parameter
 		def perform(data, callback)
-			callback.call(data)
+			begin
+				callback.call(data)
+			rescue Exception => e
+				STDERR.puts e.message
+				STDERR.puts e.backtrace
+			end
 		end
 	end
 end

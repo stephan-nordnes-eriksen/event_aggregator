@@ -12,6 +12,11 @@ describe EventAggregator::MessageJob do
 				
 				message_job.perform(data, callback)
 			end
+			it "should recover from failing callback" do
+				expect(callback).to receive(:call).and_raise("error")
+				allow(STDERR).to receive(:puts)
+				expect{message_job.perform(data,callback)}.to_not raise_error
+			end
 		end
 		describe 'illegal parameters' do
 			it 'should never be passed to MessageJob' do
