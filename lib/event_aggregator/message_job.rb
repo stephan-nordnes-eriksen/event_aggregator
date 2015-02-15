@@ -17,6 +17,7 @@ module EventAggregator
 			rescue Exception => e
 				STDERR.puts e.message
 				STDERR.puts e.backtrace
+				STDERR.puts "Source of error: #{callback.source_location}"
 			end
 		end
 	end

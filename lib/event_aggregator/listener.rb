@@ -75,7 +75,7 @@ module EventAggregator
 		# 			# => 6
 		#
 		def producer_register(message_type, callback)
-			Aggregator.register_producer(message_type, callback)
+			Aggregator.register_producer(self, message_type, callback)
 		end
 	end
 end

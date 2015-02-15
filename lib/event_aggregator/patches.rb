@@ -15,7 +15,7 @@
 #
 class Class
 	def receiving(*args)
-		type_callback = verify_event_aggregator_args(args)		
+		type_callback = verify_event_aggregator_args(args)
 
 		self.class_eval do
 			original_method = instance_method(:initialize)
@@ -34,6 +34,7 @@ class Class
 
 		self.class_eval do
 			original_method = instance_method(:initialize)
+
 			define_method(:initialize) do |*args, &block|
 				original_method.bind(self).call(*args, &block)
 				EA::Aggregator.register_all(self, type_callback[:callback])
@@ -50,7 +51,7 @@ class Class
 				original_method.bind(self).call(*args, &block)
 				
 				type_callback[:types].each do |type|
-					EA::Aggregator.register_producer(type, type_callback[:callback])
+					EA::Aggregator.register_producer(self, type, type_callback[:callback])
 				end
 			end
 		end
@@ -58,11 +59,22 @@ class Class
 
 	private
 	def verify_event_aggregator_args(args)
-		raise "No callback provided" unless args[-1].respond_to?(:call)
+		puts "args: #{args.inspect}"
+		puts "self: #{self.inspect}"
+		puts "self.class_eval{self.inspect}: #{self.class_eval{self.inspect}}"
+		puts "self.class_eval{self.method_defined?(args[-1])}: #{self.class_eval{self.method_defined?(args[-1])}}"
+
+		raise "No callback provided" unless args[-1].respond_to?(:call) || self.class_eval{self.method_defined?(args[-1])}
 		
 		return {
-			:types => args[0..-2],
-			:callback => args[-1]
+			:types                   => args[0..-2],
+			:callback                => args[-1],
+			:callback_is_method_name => !args[-1].respond_to?(:call)
 		}
 	end
 end
+
+
+# class Object
+
+# end

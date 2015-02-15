@@ -44,13 +44,13 @@ Version 2.X. For version 1.X see below
 		#The receiving method is used to register which events you want to receive when they are "published" 
 		#Multiple message types can be chained to the same callback.
 		receiving "foo", "foo2", "foo3", "...etc.", lambda{|data| puts data }
-		receiving "bar", method(:handle_message)
+		receiving "bar", :handle_message
 
 		#The responding method is used when your class answers a "request" from another class.
 		#responding also allows multiple message types to be chained.
 		#Note: There can only exist one object in the world which answers a specific type of request. The most recent registered object becomes the one who answers to the given message request.
 		responding "speed of light", "C", lambda{|data| return 299_792_458 }
-		responding "current IP", "IP", method(:ip_address)
+		responding "current IP", "IP", :ip_address
 
 		def handle_message(data)
 			puts "Event is handled:"

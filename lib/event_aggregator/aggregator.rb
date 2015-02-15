@@ -29,9 +29,12 @@ module EventAggregator
 		def self.register( listener, message_type, callback )
 			raise "Illegal listener" unless listener
 			raise "Illegal message_type" if message_type == nil
-			raise "Illegal callback" unless callback.respond_to?(:call)
-
-			@@listeners[message_type][listener] = callback
+			raise "Illegal callback" unless callback.respond_to?(:call) || listener.respond_to?(callback)
+			if callback.respond_to?(:call)
+				@@listeners[message_type][listener] = callback
+			else
+				@@listeners[message_type][listener] = listener.method(callback)
+			end
 		end
 
 
@@ -45,8 +48,13 @@ module EventAggregator
 		#
 		def self.register_all( listener, callback )
 			raise "Illegal listener" unless listener
-			raise "Illegal callback" unless callback.respond_to?(:call)
-			@@listeners_all[listener] = callback
+			raise "Illegal callback" unless callback.respond_to?(:call) || listener.respond_to?(callback)
+			
+			if callback.respond_to?(:call)
+				@@listeners_all[listener] = callback
+			else
+				@@listeners_all[listener] = listener.method(callback)
+			end
 		end
 
 		# Public: Unegister an EventAggregator::Listener to a
@@ -124,13 +132,17 @@ module EventAggregator
 		#
 		# Example:
 		#
-		# 	EventAggregator::Aggregator.register_producer("GetMultipliedByTwo", lambda{|data| data*2})
+		# 	EventAggregator::Aggregator.register_producer(producer, "GetMultipliedByTwo", lambda{|data| data*2})
 		#
-		def self.register_producer(message_type, callback)
+		def self.register_producer(producer, message_type, callback)
 			raise "Illegal message_type" if message_type == nil
-			raise "Illegal callback" unless callback.respond_to?(:call) && callback.arity == 1
+			raise "Illegal callback" unless (callback.respond_to?(:call) && callback.arity == 1) || (producer.respond_to?(callback) && producer.method(callback).arity == 1)
 			
-			@@producers[message_type] = callback
+			if callback.respond_to?(:call)
+				@@producers[message_type] = callback
+			else
+				@@producers[message_type] = producer.method(callback)
+			end
 		end
 		
 		
