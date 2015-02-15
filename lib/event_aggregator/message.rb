@@ -55,4 +55,5 @@ module EventAggregator
 			Aggregator.message_request( self )
 		end
 	end
+	M = Message #Aliasing for ease of use. EA::M.new vs EventAggregator::Message.new
 end

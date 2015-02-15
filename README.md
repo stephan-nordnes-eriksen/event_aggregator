@@ -33,6 +33,63 @@ Or install it yourself as:
 
 ## Usage
 
+Version 2.X. For version 1.X see below
+
+	#!/usr/bin/ruby
+
+	require "rubygems"
+	require "event_aggregator"
+
+	class Foo
+		#The receiving method is used to register which events you want to receive when they are "published" 
+		#Multiple message types can be chained to the same callback.
+		receiving "foo", "foo2", "foo3", "...etc.", lambda{|data| puts data }
+		receiving "bar", method(:handle_message)
+
+		#The responding method is used when your class answers a "request" from another class.
+		#responding also allows multiple message types to be chained.
+		#Note: There can only exist one object in the world which answers a specific type of request. The most recent registered object becomes the one who answers to the given message request.
+		responding "speed of light", "C", lambda{|data| return 299_792_458 }
+		responding "current IP", "IP", method(:ip_address)
+
+		def handle_message(data)
+			puts "Event is handled:"
+			puts data
+		end
+
+		#Current design choices dictates that you must have one argument in all callbacks for both receiving and responding.
+		def ip_address(data)
+			return "magically get IP address here"
+		end
+	end
+
+	f = Foo.new
+
+	#Messages are published to the world. These messages are asynchronous by default.
+	EventAggregator::Message.new("foo", "some data").publish
+	#=> some data
+	EA::Message.new("bar", 1).publish
+	#=> Event is handled:
+	#=> 1
+	EA::M.new("foo3", "data").publish
+	#=> []
+	#TODO: The below is currently un-implemented
+	f.foo_unregister("foo2")
+	EA::M.new("foo2", "data").publish
+	#=> []
+
+	#The world is queried for the following. These messages are synchroneus by default.
+	EA::M.new("speed of light", nil).request
+	#=> 299792458
+	EA::M.new("speed of sound", nil).request
+	#=> nil
+	
+	#The results can be stored to variables because the request is synchroneus.
+	c = EA::M.new("C", nil).request
+
+
+Version 1.X:
+
 	#!/usr/bin/ruby
 
 	require "rubygems"
