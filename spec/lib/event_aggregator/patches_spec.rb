@@ -5,7 +5,7 @@ describe "Patches" do
 	# let(:message_type) { Faker::Internet.password }
 	let(:data) { Faker::Internet.password }
 	
-	before(:all) do
+	before(:each) do
 		EventAggregator::Aggregator.reset
 	end
 
@@ -90,7 +90,7 @@ describe "Patches" do
 				receive_all :test
 				receive_all :test
 				def test(a)
-					a.hack()
+					a.data.hack()
 				end
 			end
 
@@ -171,6 +171,14 @@ describe "Patches" do
 				class Foo
 					receiving Faker::Internet.password, lambda { |args|  }
 					responding Faker::Internet.password, lambda { |args|  }
+				end
+				a = Foo.new
+			}.to_not raise_error
+			expect{
+				class Foo
+					receiving Faker::Internet.password, lambda { |args|  }
+					responding Faker::Internet.password, lambda { |args|  }
+					receive_all lambda { |args|  }
 				end
 				a = Foo.new
 			}.to_not raise_error

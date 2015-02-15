@@ -11,11 +11,11 @@ module EventAggregator
 	# 	end
 	class Aggregator
 		class <<self; private :new; end
-		@@pool = Thread.pool(4)
-		@@listeners = Hash.new{|h, k| h[k] = Hash.new }
-		@@listeners_all = Hash.new
+		@@pool                = Thread.pool(4)
+		@@listeners           = Hash.new{|h, k| h[k] = Hash.new }
+		@@listeners_all       = Hash.new
 		@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
-		@@producers = Hash.new
+		@@producers           = Hash.new
 		# Public: Register an EventAggregator::Listener to receive
 		# 		  a specified message type
 		#
@@ -104,10 +104,13 @@ module EventAggregator
 		# Use EventAggregator::Aggregator.reset before each test when doing unit testing.
 		#
 		def self.reset
-			@@listeners = Hash.new{|h, k| h[k] = Hash.new}
-			@@listeners_all = Hash.new
+			@@pool.shutdown
+    		
+			@@listeners           = Hash.new{|h, k| h[k] = Hash.new}
+			@@listeners_all       = Hash.new
 			@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
-			@@producers = Hash.new
+			@@producers           = Hash.new
+			@@pool                = Thread.pool(4)
 		end
 
 		# Public: Will produce another message when a message type is published.
