@@ -54,7 +54,7 @@ describe "Patches" do
 			}.to_not raise_error
 		end
 
-		it "only call callback one time" do
+		it "only call callback one time on receiving" do
 			spy_hack = spy("hack")
 			class Foo
 				receiving "a", :test
@@ -67,7 +67,9 @@ describe "Patches" do
 			a = Foo.new
 			expect(spy_hack).to receive(:hack).once
 			EA::M.new("a",spy_hack).publish
+		end
 
+		it "only call callback one time on responding" do
 			spy_hack2 = spy("hack")
 			class Foo
 				responding "b", :test
@@ -80,6 +82,21 @@ describe "Patches" do
 			a = Foo.new
 			expect(spy_hack2).to receive(:hack).once
 			EA::M.new("b",spy_hack2).request
+		end
+
+		it "only call callback one time on receive_all" do
+			spy_hack = spy("hack")
+			class Foo
+				receive_all :test
+				receive_all :test
+				def test(a)
+					a.hack()
+				end
+			end
+
+			a = Foo.new
+			expect(spy_hack).to receive(:hack).once
+			EA::M.new("a",spy_hack).publish
 		end
 
 		it "using multiple of the same does not raise error" do
