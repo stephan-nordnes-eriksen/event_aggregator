@@ -42,10 +42,10 @@ describe EventAggregator::Aggregator do
 			end
 			it "listener raise error" do
 				expect{EventAggregator::Aggregator.register(nil                                  , message_type, callback)}.to raise_error
-				expect{EventAggregator::Aggregator.register(EventAggregator::Message.new("a","b"), message_type, callback)}.to raise_error
-				expect{EventAggregator::Aggregator.register(random_string                        , message_type, callback)}.to raise_error
-				expect{EventAggregator::Aggregator.register(random_number                        , message_type, callback)}.to raise_error
-				expect{EventAggregator::Aggregator.register(2.0                                  , message_type, callback)}.to raise_error
+				#expect{EventAggregator::Aggregator.register(EventAggregator::Message.new("a","b"), message_type, callback)}.to raise_error #Should no longer raise error
+				#expect{EventAggregator::Aggregator.register(random_string                        , message_type, callback)}.to raise_error #Should no longer raise error
+				#expect{EventAggregator::Aggregator.register(random_number                        , message_type, callback)}.to raise_error #Should no longer raise error
+				#expect{EventAggregator::Aggregator.register(2.0                                  , message_type, callback)}.to raise_error #Should no longer raise error
 			end
 			it 'callback raise error' do
 				expect{EventAggregator::Aggregator.register(listener, message_type, nil                                  )}.to raise_error
@@ -394,10 +394,10 @@ describe EventAggregator::Aggregator do
 		describe 'illegal parameters' do
 			it 'listener raise error' do
 				expect{EventAggregator::Aggregator.register_all(nil,                                   callback)}.to raise_error
-				expect{EventAggregator::Aggregator.register_all(EventAggregator::Message.new("a","b"), callback)}.to raise_error
-				expect{EventAggregator::Aggregator.register_all(random_string,                         callback)}.to raise_error
-				expect{EventAggregator::Aggregator.register_all(random_number,                         callback)}.to raise_error
-				expect{EventAggregator::Aggregator.register_all(2.0,                                   callback)}.to raise_error
+				#expect{EventAggregator::Aggregator.register_all(EventAggregator::Message.new("a","b"), callback)}.to raise_error #These should no longer raise any error. We don't care what teh listener looks like
+				#expect{EventAggregator::Aggregator.register_all(random_string,                         callback)}.to raise_error #These should no longer raise any error. We don't care what teh listener looks like
+				#expect{EventAggregator::Aggregator.register_all(random_number,                         callback)}.to raise_error #These should no longer raise any error. We don't care what teh listener looks like
+				#expect{EventAggregator::Aggregator.register_all(2.0,                                   callback)}.to raise_error #These should no longer raise any error. We don't care what teh listener looks like
 			end
 			it 'callback raise error' do
 				expect{EventAggregator::Aggregator.register_all(listener, nil                                  )}.to raise_error
