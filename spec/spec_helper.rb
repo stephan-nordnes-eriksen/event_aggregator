@@ -1,3 +1,12 @@
+require 'simplecov'
+require 'coveralls'
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter
+]
+SimpleCov.start
+
 require "rubygems"
 require "bundler/setup"
 require 'rspec'
@@ -5,8 +14,9 @@ require 'rspec'
 require "faker"
 require "event_aggregator"
 #require "sucker_punch/testing/inline"
-require 'coveralls'
-Coveralls.wear!
+# require 'coveralls'
+
+# Coveralls.wear!
 
 
 

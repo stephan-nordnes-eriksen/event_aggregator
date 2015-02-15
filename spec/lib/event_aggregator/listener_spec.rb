@@ -90,7 +90,7 @@ describe EventAggregator::Listener do
 	describe ".message_type_producer_register" do
 		describe 'legal parameters' do
 			it "invoke aggregator register_producer" do
-				expect(EventAggregator::Aggregator).to receive(:register_producer).with(message_type, callback)
+				expect(EventAggregator::Aggregator).to receive(:register_producer).with(listener, message_type, callback)
 				listener.class.publicize_methods do
 					listener.producer_register(message_type, callback)
 				end

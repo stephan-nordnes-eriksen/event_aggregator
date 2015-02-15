@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe EventAggregator::Aggregator do
 	let(:listener)       { (Class.new { include EventAggregator::Listener }).new }
+	let(:producer)       { (Class.new { include EventAggregator::Listener }).new }
 	let(:listener_class) { Class.new { include EventAggregator::Listener }}
 	let(:message_type)   { Faker::Name.name }
 	let(:data)           { Faker::Name.name }
@@ -19,6 +20,16 @@ describe EventAggregator::Aggregator do
 	end
 	describe "self.register" do
 		describe 'legal parameters' do
+			it "accepts different callback types" do
+				expect{EventAggregator::Aggregator.register(listener, message_type, lambda { |args| })}.to_not raise_error
+				expect{EventAggregator::Aggregator.register(listener, message_type, Proc.new{ |args| })}.to_not raise_error
+
+				listener2 = (Class.new { include EventAggregator::Listener; def testmethod(data); end;}).new
+
+				expect{EventAggregator::Aggregator.register(listener2, message_type, :testmethod)}.to_not raise_error
+				expect{EventAggregator::Aggregator.register(listener2, message_type, "testmethod")}.to_not raise_error
+			end
+
 			it "no errors" do
 				expect{EventAggregator::Aggregator.register(listener, message_type, callback)}.to_not raise_error
 			end
@@ -310,6 +321,28 @@ describe EventAggregator::Aggregator do
 				EventAggregator::Aggregator.message_publish(message5)
 				EventAggregator::Aggregator.message_publish(message6)
 			end
+
+			it 'run correctly on all types of callback. async=true/false consisten_data=true/false' do
+				EventAggregator::Aggregator.register_all(listener, callback)
+
+				message1 = EventAggregator::Message.new(message_type      , data, true, true)
+				message2 = EventAggregator::Message.new(message_type + "2", data, true, false)
+				message3 = EventAggregator::Message.new(message_type + "3", data, false, true)
+				message4 = EventAggregator::Message.new(message_type + "4", data, false, false)
+
+				allow(message2).to receive(:clone).and_return(message2)
+				allow(message4).to receive(:clone).and_return(message4)
+
+				expect(callback).to receive(:call).with(message1)
+				expect(callback).to receive(:call).with(message2)
+				expect(callback).to receive(:call).with(message3)
+				expect(callback).to receive(:call).with(message4)
+
+				expect{EventAggregator::Aggregator.message_publish(message1)}.to_not raise_error
+				expect{EventAggregator::Aggregator.message_publish(message2)}.to_not raise_error
+				expect{EventAggregator::Aggregator.message_publish(message3)}.to_not raise_error
+				expect{EventAggregator::Aggregator.message_publish(message4)}.to_not raise_error
+			end
 		end
 		describe 'illegal parameters' do
 			it 'non-message type' do
@@ -371,6 +404,16 @@ describe EventAggregator::Aggregator do
 
 	describe "self.register_all" do
 		describe 'legal parameters' do
+			it "accepts different callback types" do
+				expect{EventAggregator::Aggregator.register_all(listener, lambda { |args| })}.to_not raise_error
+				expect{EventAggregator::Aggregator.register_all(listener, Proc.new{ |args| })}.to_not raise_error
+
+				listener2 = (Class.new { include EventAggregator::Listener; def testmethod(data); end;}).new
+
+				expect{EventAggregator::Aggregator.register_all(listener2, :testmethod)}.to_not raise_error
+				expect{EventAggregator::Aggregator.register_all(listener2, "testmethod")}.to_not raise_error
+			end
+
 			it 'registered at correct place' do
 				EventAggregator::Aggregator.register_all(listener, callback)
 				expect(EventAggregator::Aggregator.class_variable_get(:@@listeners_all)).to include(listener)
@@ -406,6 +449,10 @@ describe EventAggregator::Aggregator do
 				expect{EventAggregator::Aggregator.register_all(listener, random_number                        )}.to raise_error
 				expect{EventAggregator::Aggregator.register_all(listener, 2.0                                  )}.to raise_error
 			end
+			it 'raises error on illegal callback name' do
+				listener_2 =  (Class.new { include EventAggregator::Listener; def test(data); end }).new
+				expect{EventAggregator::Aggregator.register_all(listener_2, "test2")}.to raise_error
+			end
 		end
 	end
 
@@ -414,7 +461,7 @@ describe EventAggregator::Aggregator do
 			EventAggregator::Aggregator.register(listener, message_type, callback)
 			EventAggregator::Aggregator.register_all(listener, callback)
 			EventAggregator::Aggregator.translate_message_with(message_type, message_type + " different")
-			EventAggregator::Aggregator.register_producer(message_type, callback)
+			EventAggregator::Aggregator.register_producer(producer, message_type, callback)
 
 			EventAggregator::Aggregator.reset
 
@@ -439,7 +486,7 @@ describe EventAggregator::Aggregator do
 			EventAggregator::Aggregator.message_publish(message)
 		end
 		it "producers not responding" do
-			EventAggregator::Aggregator.register_producer(message_type, callback)
+			EventAggregator::Aggregator.register_producer(producer, message_type, callback)
 			message = EventAggregator::Message.new(message_type, data)
 
 			EventAggregator::Aggregator.reset
@@ -544,20 +591,32 @@ describe EventAggregator::Aggregator do
 	end
 
 	describe "self.register_producer" do
+		describe 'legal parameters' do
+			it "accepts different callback types" do
+				expect{EventAggregator::Aggregator.register_producer(producer, message_type, lambda { |args| })}.to_not raise_error
+				expect{EventAggregator::Aggregator.register_producer(producer, message_type, Proc.new{ |args| })}.to_not raise_error
+
+				producer2 = (Class.new { include EventAggregator::Listener; def testmethod(data); end;}).new
+
+				expect{EventAggregator::Aggregator.register_producer(producer2, message_type, :testmethod)}.to_not raise_error
+				expect{EventAggregator::Aggregator.register_producer(producer2, message_type, "testmethod")}.to_not raise_error
+			end
+		end
+
 		describe 'illegal parameters' do
 			it 'callback raise error' do
-				expect{EventAggregator::Aggregator.register_producer(message_type, nil                                  )}.to raise_error
-				expect{EventAggregator::Aggregator.register_producer(message_type, EventAggregator::Message.new("a","b"))}.to raise_error
-				expect{EventAggregator::Aggregator.register_producer(message_type, random_string                        )}.to raise_error
-				expect{EventAggregator::Aggregator.register_producer(message_type, random_number                        )}.to raise_error
-				expect{EventAggregator::Aggregator.register_producer(message_type, 2.0                                  )}.to raise_error
+				expect{EventAggregator::Aggregator.register_producer(producer, message_type, nil                                  )}.to raise_error
+				expect{EventAggregator::Aggregator.register_producer(producer, message_type, EventAggregator::Message.new("a","b"))}.to raise_error
+				expect{EventAggregator::Aggregator.register_producer(producer, message_type, random_string                        )}.to raise_error
+				expect{EventAggregator::Aggregator.register_producer(producer, message_type, random_number                        )}.to raise_error
+				expect{EventAggregator::Aggregator.register_producer(producer, message_type, 2.0                                  )}.to raise_error
 			end
 		end
 	end
 
 	describe "self.unregister_producer" do
 		it "producers not responding" do
-			EventAggregator::Aggregator.register_producer(message_type, callback)
+			EventAggregator::Aggregator.register_producer(producer, message_type, callback)
 			message = EventAggregator::Message.new(message_type, data)
 
 			EventAggregator::Aggregator.unregister_producer(message_type)
@@ -572,7 +631,7 @@ describe EventAggregator::Aggregator do
 	describe "self.message_request" do
 		describe 'legal parameters' do
 			it 'run correct callback' do
-				EventAggregator::Aggregator.register_producer(message_type, callback)
+				EventAggregator::Aggregator.register_producer(producer, message_type, callback)
 				message = EventAggregator::Message.new(message_type, data)
 
 				expect(callback).to receive(:call).with(data)
@@ -582,7 +641,7 @@ describe EventAggregator::Aggregator do
 			it 'not run incorrect callback' do
 				message_type2 = message_type + " different"
 
-				EventAggregator::Aggregator.register_producer(message_type, callback)
+				EventAggregator::Aggregator.register_producer(producer, message_type, callback)
 				message = EventAggregator::Message.new(message_type2, data)
 
 				expect(callback).to_not receive(:call).with(data)
@@ -595,8 +654,8 @@ describe EventAggregator::Aggregator do
 
 				callback2 = lambda{|data|}
 
-				EventAggregator::Aggregator.register_producer(message_type, callback)
-				EventAggregator::Aggregator.register_producer(message_type2, callback2)
+				EventAggregator::Aggregator.register_producer(producer, message_type, callback)
+				EventAggregator::Aggregator.register_producer(producer, message_type2, callback2)
 
 				message = EventAggregator::Message.new(message_type, data)
 

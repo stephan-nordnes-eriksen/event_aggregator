@@ -24,6 +24,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'guard-rspec'          , '~> 4.2', '>= 4.2.2'
   spec.add_development_dependency 'faker'                , '~> 1.2'
   spec.add_development_dependency 'coveralls'            , '~> 0.7'
-  
+  spec.add_development_dependency 'simplecov'            , '>= 0'
+
+
   spec.add_dependency 'thread'
 end
