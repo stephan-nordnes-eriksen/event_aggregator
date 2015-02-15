@@ -27,7 +27,6 @@ module EventAggregator
 		# 				message_type is published. Is executed with message.data as parameter.
 		#
 		def self.register( listener, message_type, callback )
-			raise "Illegal listener" unless listener.class < EventAggregator::Listener
 			raise "Illegal message_type" if message_type == nil
 			raise "Illegal callback" unless callback.respond_to?(:call)
 
@@ -44,7 +43,6 @@ module EventAggregator
 		# 				will execute with the message as parameter.
 		#
 		def self.register_all( listener, callback )
-			raise "Illegal listener" unless listener.class < EventAggregator::Listener
 			raise "Illegal callback" unless callback.respond_to?(:call)
 			@@listeners_all[listener] = callback
 		end
