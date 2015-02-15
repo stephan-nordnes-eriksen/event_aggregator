@@ -63,13 +63,8 @@ class Class
 		
 		return {
 			:types                   => args[0..-2],
-			:callback                => args[-1],
-			:callback_is_method_name => !args[-1].respond_to?(:call)
+			:callback                => args[-1]
 		}
 	end
 end
 
-
-# class Object
-
-# end
