@@ -54,6 +54,34 @@ describe "Patches" do
 			}.to_not raise_error
 		end
 
+		it "only call callback one time" do
+			spy_hack = spy("hack")
+			class Foo
+				receiving "a", :test
+				receiving "a", :test
+				def test(a)
+					a.hack()
+				end
+			end
+
+			a = Foo.new
+			expect(spy_hack).to receive(:hack).once
+			EA::M.new("a",spy_hack).publish
+
+			spy_hack2 = spy("hack")
+			class Foo
+				responding "b", :test
+				responding "b", :test
+				def test(a)
+					a.hack()
+				end
+			end
+
+			a = Foo.new
+			expect(spy_hack2).to receive(:hack).once
+			EA::M.new("b",spy_hack2).request
+		end
+
 		it "using multiple of the same does not raise error" do
 			expect{
 				class Foo
@@ -62,7 +90,22 @@ describe "Patches" do
 				end
 				a = Foo.new
 			}.to_not raise_error
-			#TODO: for each type
+
+			expect{
+				class Foo
+					receiving Faker::Internet.password, lambda { |args|  }
+					receiving Faker::Internet.password, lambda { |args|  }
+				end
+				a = Foo.new
+			}.to_not raise_error
+
+			expect{
+				class Foo
+					receive_all Faker::Internet.password, lambda { |args|  }
+					receive_all Faker::Internet.password, lambda { |args|  }
+				end
+				a = Foo.new
+			}.to_not raise_error
 		end
 
 
@@ -70,11 +113,28 @@ describe "Patches" do
 		it "using same callback name does not raise error" do
 			expect{
 				class Foo
+					receiving "a", lambda { |args|  }
+					receiving "a", lambda { |args|  }
+				end
+				a = Foo.new
+			}.to_not raise_error
+
+			expect{
+				class Foo
 					responding "a", lambda { |args|  }
 					responding "a", lambda { |args|  }
 				end
 				a = Foo.new
 			}.to_not raise_error
+
+			expect{
+				class Foo
+					receive_all "a", lambda { |args|  }
+					receive_all "a", lambda { |args|  }
+				end
+				a = Foo.new
+			}.to_not raise_error
+
 		end
 
 		it "using method name works" do
@@ -102,10 +162,10 @@ describe "Patches" do
 		it "gets callbacks correctly" do
 			hack_spy = spy("hack spy")
 			class Foo
-				# receiving "test type", lambda { |args|  }
+				receiving "test type", lambda { |args|  }
 				receiving "test type", :test
 
-				# responding "test type", lambda { |args|  }
+				responding "test type", lambda { |args|  }
 				responding "test type", :test
 				def test(arg)
 					arg.hack() #For some reason i can't do expect(a).to receive(:test)
