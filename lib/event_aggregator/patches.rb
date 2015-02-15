@@ -59,7 +59,7 @@ class Class
 
 	private
 	def verify_event_aggregator_args(args)
-		raise "No callback provided" unless args[-1].respond_to?(:call) || args[-1].is_a?(String) || args[-1].is_a?(Symbol) #self.class_eval{self.method_defined?(args[-1])} #This fails if 
+		raise "No callback provided" unless args[-1].respond_to?(:call) || args[-1].is_a?(String) || args[-1].is_a?(Symbol)
 		
 		return {
 			:types                   => args[0..-2],

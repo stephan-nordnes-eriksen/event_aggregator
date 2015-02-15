@@ -6,6 +6,7 @@ describe "Patches" do
 	let(:data) { Faker::Internet.password }
 	
 	before(:each) do
+		Object.send(:remove_const, :Foo) if Object.constants.include?(:Foo)
 		EventAggregator::Aggregator.reset
 	end
 
@@ -86,6 +87,7 @@ describe "Patches" do
 
 		it "only call callback one time on receive_all" do
 			spy_hack = spy("hack")
+
 			class Foo
 				receive_all :test
 				receive_all :test
@@ -96,7 +98,11 @@ describe "Patches" do
 
 			a = Foo.new
 			expect(spy_hack).to receive(:hack).once
-			EA::M.new("a",spy_hack).publish
+			message = EA::M.new("a",spy_hack)
+			message.publish
+
+
+
 		end
 
 		it "using multiple of the same does not raise error" do
