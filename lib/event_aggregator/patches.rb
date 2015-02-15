@@ -59,12 +59,7 @@ class Class
 
 	private
 	def verify_event_aggregator_args(args)
-		puts "args: #{args.inspect}"
-		puts "self: #{self.inspect}"
-		puts "self.class_eval{self.inspect}: #{self.class_eval{self.inspect}}"
-		puts "self.class_eval{self.method_defined?(args[-1])}: #{self.class_eval{self.method_defined?(args[-1])}}"
-
-		raise "No callback provided" unless args[-1].respond_to?(:call) || self.class_eval{self.method_defined?(args[-1])}
+		raise "No callback provided" unless args[-1].respond_to?(:call) || args[-1].is_a?(String) || args[-1].is_a?(Symbol) #self.class_eval{self.method_defined?(args[-1])} #This fails if 
 		
 		return {
 			:types                   => args[0..-2],

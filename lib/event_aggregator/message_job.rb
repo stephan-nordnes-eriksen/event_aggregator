@@ -17,7 +17,12 @@ module EventAggregator
 			rescue Exception => e
 				STDERR.puts e.message
 				STDERR.puts e.backtrace
-				STDERR.puts "Source of error: #{callback.source_location}"
+				STDERR.puts "------------"
+				if callback.respond_to?(:source_location)
+					STDERR.puts "Source of error: #{callback.source_location}"
+				else
+					STDERR.puts "Error is probably due to invalid callback. No source location found."
+				end
 			end
 		end
 	end
