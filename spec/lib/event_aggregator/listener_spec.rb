@@ -1,21 +1,5 @@
 require 'spec_helper'
 
-
-# Public: Some ruby trickery to be able to test private methods
-#
-# Example:
-# whatever_object.class.publicize_methods do
-# #... execute private methods
-# end
-class Class
-	def publicize_methods
-		saved_private_instance_methods = self.private_instance_methods
-		self.class_eval { public *saved_private_instance_methods }
-		yield
-		self.class_eval { private *saved_private_instance_methods }
-	end
-end
-
 describe EventAggregator::Listener do
 	let(:listener)           { (Class.new { include EventAggregator::Listener }).new }
 	let(:listener_class)     { Class.new { include EventAggregator::Listener } }
@@ -34,9 +18,7 @@ describe EventAggregator::Listener do
 			it 'invoke aggregator register' do
 				expect(EventAggregator::Aggregator).to receive(:register).with(listener, event_type, callback)
 
-				listener.class.publicize_methods do
-					listener.event_type_register(event_type, callback)
-				end
+				listener.send(:event_type_register, event_type, callback)
 			end
 		end
 		describe 'illegal parameters' do
@@ -52,13 +34,11 @@ describe EventAggregator::Listener do
 	describe '.event_type_unregister' do
 		describe 'legal parameters' do
 			it 'invoke aggregator unregister' do
-				listener.class.publicize_methods do
-					listener.event_type_register(event_type, callback)
+				listener.send(:event_type_register, event_type, callback)
 
-					expect(EventAggregator::Aggregator).to receive(:unregister).with(listener, event_type)
+				expect(EventAggregator::Aggregator).to receive(:unregister).with(listener, event_type)
 
-					listener.event_type_unregister(event_type)
-				end
+				listener.send(:event_type_unregister, event_type)
 			end
 		end
 	end
@@ -66,11 +46,9 @@ describe EventAggregator::Listener do
 	describe '.event_type_register_all' do
 		describe 'legal parameters' do
 			it 'invoke aggregator unregister_all' do
-				listener.class.publicize_methods do
-					expect(EventAggregator::Aggregator).to receive(:register_all).with(listener,callback)
+				expect(EventAggregator::Aggregator).to receive(:register_all).with(listener,callback)
 
-					listener.event_type_register_all(callback)
-				end
+				listener.send(:event_type_register_all, callback)
 			end
 		end
 	end
@@ -78,11 +56,8 @@ describe EventAggregator::Listener do
 	describe '.event_type_unregister_all' do
 		describe 'legal parameters' do
 			it 'invoke aggregator unregister' do
-				listener.class.publicize_methods do
-					expect(EventAggregator::Aggregator).to receive(:unregister_all).with(listener)
-
-					listener.event_type_unregister_all()
-				end
+				expect(EventAggregator::Aggregator).to receive(:unregister_all).with(listener)
+				listener.send(:event_type_unregister_all)
 			end
 		end
 	end
@@ -91,9 +66,7 @@ describe EventAggregator::Listener do
 		describe 'legal parameters' do
 			it "invoke aggregator register_producer" do
 				expect(EventAggregator::Aggregator).to receive(:register_producer).with(listener, event_type, callback)
-				listener.class.publicize_methods do
-					listener.producer_register(event_type, callback)
-				end
+				listener.send(:producer_register, event_type, callback)
 			end
 		end
 	end
