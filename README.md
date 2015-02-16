@@ -31,14 +31,20 @@ Or install it yourself as:
 
     $ gem install event_aggregator
 
+#TODO: MAKE A MUCH BETTER README.
+It is very confusing now, I know, sorry. 
+
 ## Usage
 
-Version 2.X. For version 1.X see below
+Version 2.X syntax below. Only works with ruby 2.0+. For version 1.X of event_aggregator see below.
 
 	#!/usr/bin/ruby
 
 	require "rubygems"
 	require "event_aggregator"
+
+	using EventAggregator #This will enable the shorthand notation shown here. Without this, you must use the 1.X style syntax. It uses ruby 2.0 refinements syntax. Read up on how this works in relation to namespaces. One good article: http://timelessrepo.com/refinements-in-ruby
+
 
 	class Foo
 		#The receiving method is used to register which events you want to receive when they are "published" 
@@ -61,27 +67,36 @@ Version 2.X. For version 1.X see below
 		def ip_address(data)
 			return "magically get IP address here"
 		end
+
+		#Used as an example here of how to unregister for types
+		def unregister_from_type(type)
+			event_type_unregister(type)
+		end
 	end
 
 	f = Foo.new
 
+
+
 	#Events are published to the world. These events are asynchronous by default.
+	event_publish("foo", "some data")
+	#=> some data
+	#The same can be achieved out of context of the using refinement by
 	EventAggregator::Event.new("foo", "some data").publish
 	#=> some data
-	EA::Event.new("bar", 1).publish
+	EA::E.new("bar", 1).publish #Or by shorthand
 	#=> Event is handled:
 	#=> 1
-	EA::E.new("foo3", "data").publish
+	event_publish("foo3", "data") #nothing will happen
 	#=> []
-	#TODO: The below is currently un-implemented
-	f.foo_unregister("foo2")
-	EA::E.new("foo2", "data").publish
+	f.unregister_from_type("foo2")
+	event_publish("foo2", "data")
 	#=> []
 
 	#The world is queried for the following. These events are synchroneus by default.
 	EA::E.new("speed of light", nil).request
 	#=> 299792458
-	EA::E.new("speed of sound", nil).request
+	event_request("speed of sound", nil)
 	#=> nil
 	
 	#The results can be stored to variables because the request is synchroneus.
