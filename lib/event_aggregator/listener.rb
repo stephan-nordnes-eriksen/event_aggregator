@@ -105,7 +105,7 @@ module EventAggregator
 		#   event_request("message type A", data)
 		#   # => The value returned by a registered producer.
 		#
-		# Nothing worth keeping.
+		# The value returned by a registered producer.
 		def event_request(type, data)
 			EventAggregator::Event.new(type, data).request
 		end
