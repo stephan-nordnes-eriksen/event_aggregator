@@ -11,11 +11,11 @@ module EventAggregator
 	# 	end
 	class Aggregator
 		class <<self; private :new; end
-		@@pool                = Thread.pool(4)
-		@@listeners           = Hash.new{|h, k| h[k] = Hash.new }
-		@@listeners_all       = Hash.new
+		@@pool              = Thread.pool(4)
+		@@listeners         = Hash.new{|h, k| h[k] = Hash.new }
+		@@listeners_all     = Hash.new
 		@@event_translation = Hash.new{|h, k| h[k] = Hash.new }
-		@@producers           = Hash.new
+		@@producers         = Hash.new
 		# Public: Register an EventAggregator::Listener to receive
 		# 		  a specified event type
 		#
@@ -106,11 +106,11 @@ module EventAggregator
 		def self.reset
 			@@pool.shutdown
     		
-			@@listeners           = Hash.new{|h, k| h[k] = Hash.new}
-			@@listeners_all       = Hash.new
+			@@listeners         = Hash.new{|h, k| h[k] = Hash.new}
+			@@listeners_all     = Hash.new
 			@@event_translation = Hash.new{|h, k| h[k] = Hash.new }
-			@@producers           = Hash.new
-			@@pool                = Thread.pool(4)
+			@@producers         = Hash.new
+			@@pool              = Thread.pool(4)
 		end
 
 		# Public: Will produce another event when a event type is published.
@@ -173,8 +173,8 @@ module EventAggregator
 			case [async, consisten_data || data == nil]
 			when [true, true]   then @@pool.process{ EventAggregator::EventJob.new.perform(data,       callback) }
 			when [true, false]  then @@pool.process{ EventAggregator::EventJob.new.perform(data.clone, callback) }
-			when [false, true]  then EventAggregator::EventJob.new.perform(data,       callback)
-			when [false, false] then EventAggregator::EventJob.new.perform(data.clone, callback)
+			when [false, true]  then                 EventAggregator::EventJob.new.perform(data,       callback)
+			when [false, false] then                 EventAggregator::EventJob.new.perform(data.clone, callback)
 			end
 		end
 	end
