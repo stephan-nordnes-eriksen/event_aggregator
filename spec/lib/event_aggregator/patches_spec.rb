@@ -216,7 +216,7 @@ describe "Patches" do
 			a = Object.new
 
 			message_spy = spy("message spy")
-			expect(EA::E).to receive(:new).with("type", "data").and_return(message_spy)
+			expect(EA::E).to receive(:new).with("type", "data", true, true).and_return(message_spy)
 			expect(message_spy).to receive(:publish)
 			a.event_publish("type", "data")
 		end
@@ -224,7 +224,7 @@ describe "Patches" do
 			a = Object.new
 
 			message_spy = spy("message spy")
-			expect(EA::E).to receive(:new).with("type", "data").and_return(message_spy)
+			expect(EA::E).to receive(:new).with("type", "data", true, true).and_return(message_spy)
 			expect(message_spy).to receive(:request)
 			a.event_request("type", "data")
 		end
