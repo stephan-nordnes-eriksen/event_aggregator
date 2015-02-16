@@ -28,7 +28,7 @@ module EventAggregator
 		#   event_type_register("foo", Proc.new { puts "foo" })
 		#
 		def event_type_register( event_type, callback )
-			Aggregator.register( self, event_type, callback)
+			EventAggregator::Aggregator.register( self, event_type, callback)
 		end
 
 		
@@ -38,7 +38,7 @@ module EventAggregator
 		# callback - The method that will be invoked every time this event type is received. Must have: callback.respond_to? :call #=> true
 		#
 		def event_type_register_all(callback)
-			Aggregator.register_all(self, callback)
+			EventAggregator::Aggregator.register_all(self, callback)
 		end
 
 		# Public: Used to remove a certain type of event from your listening types. Events of this specific type will no longer
@@ -51,7 +51,7 @@ module EventAggregator
 		#   event_type_unregister("foo")
 		#
 		def event_type_unregister( event_type )
-			Aggregator.unregister(self, event_type)
+			EventAggregator::Aggregator.unregister(self, event_type)
 		end
 
 		
@@ -59,7 +59,7 @@ module EventAggregator
 		# Listener will no longer recieve any callbacks when events of any kind are published.
 		#
 		def event_type_unregister_all
-			Aggregator.unregister_all(self)
+			EventAggregator::Aggregator.unregister_all(self)
 		end
 
 
@@ -75,7 +75,40 @@ module EventAggregator
 		# 			# => 6
 		#
 		def producer_register(event_type, callback)
-			Aggregator.register_producer(self, event_type, callback)
+			EventAggregator::Aggregator.register_producer(self, event_type, callback)
 		end
+
+		# Public: Publishes event.
+		#
+		# type  - The event type.
+		# data - The data of the event.
+		# async = true - Indicates if the message should be handled async or sync. Default = Async
+		# consisten_data = true - Indicates if the data object should be cloned for each listener or not. Default = not cloned.
+		#
+		# Examples
+		#
+		#   event_publish("message type A", data)
+		#   # => {}
+		#
+		# Nothing worth keeping.
+		def event_publish(type, data, async = true, consisten_data = true)
+			EventAggregator::Event.new(type, data, async, consisten_data).publish
+		end
+
+		# Public: Requests event.
+		#
+		# type  - The event type.
+		# data - The data of the event.
+		#
+		# Examples
+		#
+		#   event_request("message type A", data)
+		#   # => The value returned by a registered producer.
+		#
+		# Nothing worth keeping.
+		def event_request(type, data)
+			EventAggregator::Event.new(type, data).request
+		end
+
 	end
 end

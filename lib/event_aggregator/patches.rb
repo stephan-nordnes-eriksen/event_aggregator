@@ -70,10 +70,5 @@ end
 
 #TODO: Consider if this is a sin or not. It can interfere with other stuff. Maybe rename to something like event_aggregator_publish
 class Object
-	def event_publish(type, data, async = true, consisten_data = true)
-		EventAggregator::Event.new(type, data, async, consisten_data).publish
-	end
-	def event_request(type, data, async = true, consisten_data = true)
-		EventAggregator::Event.new(type, data, async, consisten_data).request
-	end
+	include EventAggregator::Listener
 end
