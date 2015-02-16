@@ -47,6 +47,7 @@ module EventAggregator
 		def publish
 			Aggregator.event_publish( self )
 		end
+		alias_method :p, :publish
 
 		# Public: Will provide data if a producer of this event_type is present.
 		#
@@ -54,6 +55,7 @@ module EventAggregator
 		def request
 			Aggregator.event_request( self )
 		end
+		alias_method :r, :request
 	end
 	E = Event #Aliasing for ease of use. EA::M.new vs EventAggregator::Event.new
 end
