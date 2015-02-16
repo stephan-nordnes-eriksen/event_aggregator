@@ -6,7 +6,7 @@
 # Examples
 #
 #   class Foo
-#		receiving "I want this message type", "and this", lambda{|e| puts "and do this with them"}
+#		receiving "I want this event type", "and this", lambda{|e| puts "and do this with them"}
 #		receiving "Ohh!! And also this", lambda{|e| puts "but only do this"}
 #		responding "This one I know!", lambda{|e| puts "the answer is #{e+1}"}
 #		responding "This also", "and this", lambda{|e| puts "the answer is #{e+2}"}

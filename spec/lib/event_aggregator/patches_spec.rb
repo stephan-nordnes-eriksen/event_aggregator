@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "Patches" do
 	
-	# let(:message_type) { Faker::Internet.password }
+	# let(:event_type) { Faker::Internet.password }
 	let(:data) { Faker::Internet.password }
 	
 	before(:each) do
@@ -67,7 +67,7 @@ describe "Patches" do
 
 			a = Foo.new
 			expect(spy_hack).to receive(:hack).once
-			EA::M.new("a",spy_hack).publish
+			EA::E.new("a",spy_hack).publish
 		end
 
 		it "only call callback one time on responding" do
@@ -82,7 +82,7 @@ describe "Patches" do
 
 			a = Foo.new
 			expect(spy_hack2).to receive(:hack).once
-			EA::M.new("b",spy_hack2).request
+			EA::E.new("b",spy_hack2).request
 		end
 
 		it "only call callback one time on receive_all" do
@@ -98,8 +98,8 @@ describe "Patches" do
 
 			a = Foo.new
 			expect(spy_hack).to receive(:hack).once
-			message = EA::M.new("a",spy_hack)
-			message.publish
+			event = EA::E.new("a",spy_hack)
+			event.publish
 
 
 
@@ -204,10 +204,10 @@ describe "Patches" do
 			end
 			a = Foo.new
 			expect(hack_spy).to receive(:hack)
-			EA::M.new("test type", hack_spy).publish
+			EA::E.new("test type", hack_spy).publish
 
 			expect(hack_spy).to receive(:hack)
-			EA::M.new("test type", hack_spy).request
+			EA::E.new("test type", hack_spy).request
 		end
 	end
 end

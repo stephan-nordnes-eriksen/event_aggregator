@@ -14,37 +14,37 @@ module EventAggregator
 		@@pool                = Thread.pool(4)
 		@@listeners           = Hash.new{|h, k| h[k] = Hash.new }
 		@@listeners_all       = Hash.new
-		@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
+		@@event_translation = Hash.new{|h, k| h[k] = Hash.new }
 		@@producers           = Hash.new
 		# Public: Register an EventAggregator::Listener to receive
-		# 		  a specified message type
+		# 		  a specified event type
 		#
 		# listener - An EventAggregator::Listener which should receive
-		# 			 the messages.
-		# message_type - The message type to receive. Can be anything except nil.
-		# 				 Often it is preferable to use a string eg. "Message Type".
-		# callback - The callback that will be executed when messages of type equal
-		# 				message_type is published. Is executed with message.data as parameter.
+		# 			 the events.
+		# event_type - The event type to receive. Can be anything except nil.
+		# 				 Often it is preferable to use a string eg. "Event Type".
+		# callback - The callback that will be executed when events of type equal
+		# 				event_type is published. Is executed with event.data as parameter.
 		#
-		def self.register( listener, message_type, callback )
+		def self.register( listener, event_type, callback )
 			raise "Illegal listener" unless listener
-			raise "Illegal message_type" if message_type == nil
+			raise "Illegal event_type" if event_type == nil
 			raise "Illegal callback" unless callback.respond_to?(:call) || listener.respond_to?(callback)
 			if callback.respond_to?(:call)
-				@@listeners[message_type][listener] = callback
+				@@listeners[event_type][listener] = callback
 			else
-				@@listeners[message_type][listener] = listener.method(callback)
+				@@listeners[event_type][listener] = listener.method(callback)
 			end
 		end
 
 
 		# Public: Register an EventAggregator::Listener to receive
-		# 		  every single message that is published.
+		# 		  every single event that is published.
 		#
 		# listener - An EventAggregator::Listener which should receive
-		# 			 the messages.
-		# callback - The callback that will be executed every time a message is published.
-		# 				will execute with the message as parameter.
+		# 			 the events.
+		# callback - The callback that will be executed every time a event is published.
+		# 				will execute with the event as parameter.
 		#
 		def self.register_all( listener, callback )
 			raise "Illegal listener" unless listener
@@ -58,19 +58,19 @@ module EventAggregator
 		end
 
 		# Public: Unegister an EventAggregator::Listener to a
-		# 		  specified message type. The listener will no
-		# 		  longer get messages of this type.
+		# 		  specified event type. The listener will no
+		# 		  longer get events of this type.
 		#
 		# listener - The EventAggregator::Listener which should no longer receive
-		# 			 the messages.
-		# message_type - The message type to unregister for.
-		def self.unregister( listener, message_type )
-			@@listeners[message_type].delete(listener)
+		# 			 the events.
+		# event_type - The event type to unregister for.
+		def self.unregister( listener, event_type )
+			@@listeners[event_type].delete(listener)
 		end
 
-		# Public: As Unregister, but will unregister listener from all message types.
+		# Public: As Unregister, but will unregister listener from all event types.
 		#!
-		# listener - The listener who should no longer get any messages at all,
+		# listener - The listener who should no longer get any events at all,
 		# 			 regardless of type.
 		def self.unregister_all( listener )
 			@@listeners.each do |key,value|
@@ -79,23 +79,23 @@ module EventAggregator
 			@@listeners_all.delete(listener)
 		end
 
-		# Public: Will publish the specified message to all listeners
-		# 		  who has registered for this message type.
+		# Public: Will publish the specified event to all listeners
+		# 		  who has registered for this event type.
 		#
-		# message - The message to be distributed to the listeners.
-		# async - true => message will be sent async. Default true
+		# event - The event to be distributed to the listeners.
+		# async - true => event will be sent async. Default true
 		# consisten_data - true => the same object will be sent to all recievers. Default false
-		def self.message_publish ( message )
-			raise "Invalid message" unless message.respond_to?(:message_type) && message.respond_to?(:data)
-			@@listeners[message.message_type].each do |listener, callback|	
-				perform_message_job(message.data, callback, message.async, message.consisten_data)
+		def self.event_publish ( event )
+			raise "Invalid event" unless event.respond_to?(:event_type) && event.respond_to?(:data)
+			@@listeners[event.event_type].each do |listener, callback|	
+				perform_event_job(event.data, callback, event.async, event.consisten_data)
 			end
 			@@listeners_all.each do |listener,callback|
-				perform_message_job(message, callback, message.async, message.consisten_data)
+				perform_event_job(event, callback, event.async, event.consisten_data)
 			end
-			@@message_translation[message.message_type].each do |message_type_new, callback|
-				#TODO: I added message.async and consisten_data here. Add tests for that, and make a new version
-				EventAggregator::Message.new(message_type_new, callback.call(message.data), message.async, message.consisten_data).publish
+			@@event_translation[event.event_type].each do |event_type_new, callback|
+				#TODO: I added event.async and consisten_data here. Add tests for that, and make a new version
+				EventAggregator::Event.new(event_type_new, callback.call(event.data), event.async, event.consisten_data).publish
 			end
 		end
 
@@ -108,73 +108,73 @@ module EventAggregator
     		
 			@@listeners           = Hash.new{|h, k| h[k] = Hash.new}
 			@@listeners_all       = Hash.new
-			@@message_translation = Hash.new{|h, k| h[k] = Hash.new }
+			@@event_translation = Hash.new{|h, k| h[k] = Hash.new }
 			@@producers           = Hash.new
 			@@pool                = Thread.pool(4)
 		end
 
-		# Public: Will produce another message when a message type is published.
+		# Public: Will produce another event when a event type is published.
 		#
-		# message_type - Type of the message that will trigger a new message to be published.
-		# message_type_new - The type of the new message that will be published
-		# callback=lambda{|data| data} - The callback that will transform the data from message_type to message_type_new. Default: copy.
+		# event_type - Type of the event that will trigger a new event to be published.
+		# event_type_new - The type of the new event that will be published
+		# callback=lambda{|data| data} - The callback that will transform the data from event_type to event_type_new. Default: copy.
 		#
-		def self.translate_message_with(message_type, message_type_new, callback=lambda{|data| data})
-			raise "Illegal parameters" if message_type == nil || message_type_new == nil || !callback.respond_to?(:call) || callback.arity != 1 #TODO: The callback.parameters is not 1.8.7 compatible.
-			raise "Illegal parameters, equal message_type and message_type_new" if message_type == message_type_new || message_type.eql?(message_type_new)
+		def self.translate_event_with(event_type, event_type_new, callback=lambda{|data| data})
+			raise "Illegal parameters" if event_type == nil || event_type_new == nil || !callback.respond_to?(:call) || callback.arity != 1 #TODO: The callback.parameters is not 1.8.7 compatible.
+			raise "Illegal parameters, equal event_type and event_type_new" if event_type == event_type_new || event_type.eql?(event_type_new)
 
-			@@message_translation[message_type][message_type_new] = callback unless @@message_translation[message_type][message_type_new] == callback
+			@@event_translation[event_type][event_type_new] = callback unless @@event_translation[event_type][event_type_new] == callback
 		end
 
 		
-		# Public: Registering a producer with the Aggregator. A producer will respond to message requests, a 
+		# Public: Registering a producer with the Aggregator. A producer will respond to event requests, a 
 		# 			request for a certain piece of data. 
 		#
-		# message_type - The message type that this callback will respond to.
+		# event_type - The event type that this callback will respond to.
 		# callback - The callback that returns data to the requester. Must have one parameter.
 		#
 		# Example:
 		#
 		# 	EventAggregator::Aggregator.register_producer(producer, "GetMultipliedByTwo", lambda{|data| data*2})
 		#
-		def self.register_producer(producer, message_type, callback)
-			raise "Illegal message_type" if message_type == nil
+		def self.register_producer(producer, event_type, callback)
+			raise "Illegal event_type" if event_type == nil
 			raise "Illegal callback" unless (callback.respond_to?(:call) && callback.arity == 1) || (producer.respond_to?(callback) && producer.method(callback).arity == 1)
 			
 			if callback.respond_to?(:call)
-				@@producers[message_type] = callback
+				@@producers[event_type] = callback
 			else
-				@@producers[message_type] = producer.method(callback)
+				@@producers[event_type] = producer.method(callback)
 			end
 		end
 		
 		
 		# Public: Will remove a producer.
 		#
-		# message_type - The message type which will no longer respond to message requests.
+		# event_type - The event type which will no longer respond to event requests.
 		#
-		def self.unregister_producer(message_type)
-			@@producers.delete(message_type)
+		def self.unregister_producer(event_type)
+			@@producers.delete(event_type)
 		end
 
 		
 		# Public: Request a piece of information.
 		#
-		# message - The message that will be requested based on its message type and data.
+		# event - The event that will be requested based on its event type and data.
 		#
-		# Returns The data provided by a producer registered for this specific message type, or nil.
+		# Returns The data provided by a producer registered for this specific event type, or nil.
 		#
-		def self.message_request(message)
-			@@producers[message.message_type] ? @@producers[message.message_type].call(message.data) : nil
+		def self.event_request(event)
+			@@producers[event.event_type] ? @@producers[event.event_type].call(event.data) : nil
 		end
 
 		private
-		def self.perform_message_job(data, callback, async, consisten_data)
+		def self.perform_event_job(data, callback, async, consisten_data)
 			case [async, consisten_data || data == nil]
-			when [true, true]   then @@pool.process{ EventAggregator::MessageJob.new.perform(data,       callback) }
-			when [true, false]  then @@pool.process{ EventAggregator::MessageJob.new.perform(data.clone, callback) }
-			when [false, true]  then EventAggregator::MessageJob.new.perform(data,       callback)
-			when [false, false] then EventAggregator::MessageJob.new.perform(data.clone, callback)
+			when [true, true]   then @@pool.process{ EventAggregator::EventJob.new.perform(data,       callback) }
+			when [true, false]  then @@pool.process{ EventAggregator::EventJob.new.perform(data.clone, callback) }
+			when [false, true]  then EventAggregator::EventJob.new.perform(data,       callback)
+			when [false, false] then EventAggregator::EventJob.new.perform(data.clone, callback)
 			end
 		end
 	end

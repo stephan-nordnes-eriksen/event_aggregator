@@ -1,5 +1,5 @@
 module EventAggregator
-	# Public: A module you can include or extend to receive messages from
+	# Public: A module you can include or extend to receive events from
 	# the event Aggregator system.
 	#
 	# Examples
@@ -9,56 +9,56 @@ module EventAggregator
 	# 		...
 	# 		def initialize()
 	# 			...
-	# 			message_type_register( "foo", lambda{ puts "bar" } )
+	# 			event_type_register( "foo", lambda{ puts "bar" } )
 	# 		end
 	# 		...
 	#  	end
 	#
 	module Listener
 		private
-		# public: Use to add message types you want to receive. Overwirte existing callback when existing message type is given.
+		# public: Use to add event types you want to receive. Overwirte existing callback when existing event type is given.
 		#
-		# message_type 	- A string indicating the message type you want to receive from the event aggregrator. Can actually be anything.
-		# callback 		- The method that will be invoked every time this message type is received. Must have: callback.respond_to? :call #=> true
+		# event_type 	- A string indicating the event type you want to receive from the event aggregrator. Can actually be anything.
+		# callback 		- The method that will be invoked every time this event type is received. Must have: callback.respond_to? :call #=> true
 		#
 		# Examples
 		#
-		#   message_type_register("foo", method(:my_class_method))
-		#   message_type_register("foo", lambda { puts "foo" })
-		#   message_type_register("foo", Proc.new { puts "foo" })
+		#   event_type_register("foo", method(:my_class_method))
+		#   event_type_register("foo", lambda { puts "foo" })
+		#   event_type_register("foo", Proc.new { puts "foo" })
 		#
-		def message_type_register( message_type, callback )
-			Aggregator.register( self, message_type, callback)
+		def event_type_register( event_type, callback )
+			Aggregator.register( self, event_type, callback)
 		end
 
 		
-		# Public: Used to register listener for all message types. Every time a message is published
-		# the provided callback will be executed with the message as the content.
+		# Public: Used to register listener for all event types. Every time a event is published
+		# the provided callback will be executed with the event as the content.
 		#
-		# callback - The method that will be invoked every time this message type is received. Must have: callback.respond_to? :call #=> true
+		# callback - The method that will be invoked every time this event type is received. Must have: callback.respond_to? :call #=> true
 		#
-		def message_type_register_all(callback)
+		def event_type_register_all(callback)
 			Aggregator.register_all(self, callback)
 		end
 
-		# Public: Used to remove a certain type of message from your listening types. Messages of this specific type will no longer
+		# Public: Used to remove a certain type of event from your listening types. Events of this specific type will no longer
 		# invoke any callbacks.
 		#
-		# message_type - A string indicating the message type you no longer want to receive.
+		# event_type - A string indicating the event type you no longer want to receive.
 		#
 		# Examples
 		#
-		#   message_type_unregister("foo")
+		#   event_type_unregister("foo")
 		#
-		def message_type_unregister( message_type )
-			Aggregator.unregister(self, message_type)
+		def event_type_unregister( event_type )
+			Aggregator.unregister(self, event_type)
 		end
 
 		
-		# Public: Will unregister the listener from all message types as well as the message_type_register_all.
-		# Listener will no longer recieve any callbacks when messages of any kind are published.
+		# Public: Will unregister the listener from all event types as well as the event_type_register_all.
+		# Listener will no longer recieve any callbacks when events of any kind are published.
 		#
-		def message_type_unregister_all
+		def event_type_unregister_all
 			Aggregator.unregister_all(self)
 		end
 
@@ -66,16 +66,16 @@ module EventAggregator
 		
 		# Public: Duplicate some text an arbitrary number of times.
 		#
-		# message_type - A string indicating the the message type the callback will respond to
-		# callback - The callback returning data whenever a message requests the message_type.
+		# event_type - A string indicating the the event type the callback will respond to
+		# callback - The callback returning data whenever a event requests the event_type.
 		#
 		# Excample: 
 		# 			listener.producer_register("MultiplyByTwo", lambda{|data| return data*2})
-		# 			number = EventAggregator::Message.new("MultiplyByTwo", 3).request
+		# 			number = EventAggregator::Event.new("MultiplyByTwo", 3).request
 		# 			# => 6
 		#
-		def producer_register(message_type, callback)
-			Aggregator.register_producer(self, message_type, callback)
+		def producer_register(event_type, callback)
+			Aggregator.register_producer(self, event_type, callback)
 		end
 	end
 end
