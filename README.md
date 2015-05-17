@@ -174,6 +174,11 @@ Using Semantic Versioning - http://semver.org/
 	Adding functionality and changes that are backwards-compatible. Updating from 0.X -> 0.Y should not break your code.
 #### X - Major
 	Architectural changes and other major changes that alter the API. Updating from X -> Y will most likely break your code.
+	
+## License:
+
+MIT
+
 ## Contributing
 
 1. Fork it
